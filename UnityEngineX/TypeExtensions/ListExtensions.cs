@@ -64,6 +64,12 @@ namespace UnityEngineX
             list.RemoveAt(lastIndex);
         }
 
+
+        public static void RemoveFrom<T>(this List<T> list, int index)
+        {
+            list.RemoveRange(index, list.Count - index);
+        }
+
         public static void SwapWithLast<T>(this List<T> list, int index)
         {
             if (list.Count <= 1)
@@ -114,8 +120,9 @@ namespace UnityEngineX
 
         public static T Pop<T>(this List<T> list)
         {
-            T last = list.Last();
-            list.RemoveLast();
+            int lastIndex = list.Count - 1;
+            T last = list[lastIndex];
+            list.RemoveAt(lastIndex);
             return last;
         }
 
@@ -141,11 +148,10 @@ namespace UnityEngineX
 
         public static void Shuffle<T>(this List<T> list)
         {
-            int chosen = -1;
             T temp;
             for (int i = list.Count - 1; i >= 1; i--)
             {
-                chosen = UnityEngine.Random.Range(0, i + 1);
+                int chosen = UnityEngine.Random.Range(0, i + 1);
                 if (chosen == i)
                     continue;
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 
 namespace UnityEngineX
@@ -36,6 +37,34 @@ namespace UnityEngineX
 #endif
         }
 
+        public static string GetPrettyName(this Type type)
+        {
+            if (type.IsGenericType)
+            {
+                StringBuilder stringBuilder = StringBuilderPool.Take();
+
+                string typeName = type.Name;
+                string typeNameNoGenerics = typeName.Substring(0, typeName.IndexOf('`'));
+
+                stringBuilder.Append(typeNameNoGenerics);
+                stringBuilder.Append("<");
+                foreach (Type genericArg in type.GenericTypeArguments)
+                {
+                    stringBuilder.Append(GetPrettyName(genericArg));
+                }
+                stringBuilder.Append(">");
+
+                string result = stringBuilder.ToString();
+
+                StringBuilderPool.Release(stringBuilder);
+
+                return result;
+            }
+            else
+            {
+                return type.Name;
+            }
+        }
 
         private static IEnumerable<T> Concat<T>(IEnumerable<IEnumerable<T>> sequences)
         {
