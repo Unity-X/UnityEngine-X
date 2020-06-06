@@ -37,20 +37,115 @@ namespace UnityEngineX
 #endif
         }
 
+        public static string GetPrettyFullName(this Type type)
+        {
+            StringBuilder stringBuilder = StringBuilderPool.Take();
+
+            if (type.IsArray)
+            {
+                stringBuilder.Append(type.GetElementType().GetPrettyFullName());
+                stringBuilder.Append("[]");
+            }
+            else if (type.IsGenericType)
+            {
+                Queue<Type> genericArguments = new Queue<Type>(type.GenericTypeArguments);
+                string typeName = type.FullName;
+
+                typeName = typeName.Substring(0, typeName.IndexOf('['));
+
+                int begin;
+                int end = -1;
+                int i = 0;
+                bool isParsingGenericArgCount = false;
+
+                void appendNoGenericArgument()
+                {
+                    stringBuilder.Append(typeName.Substring(begin, end - begin));
+                }
+                void appendGenericArguments()
+                {
+                    string argCountTxt = typeName.Substring(begin, end - begin);
+                    int argCount = int.Parse(argCountTxt);
+
+                    stringBuilder.Append('<');
+                    for (int a = 0; a < argCount; a++)
+                    {
+                        stringBuilder.Append(genericArguments.Dequeue().GetPrettyFullName());
+                        if (argCount > 1 && a < argCount - 1)
+                            stringBuilder.Append(", ");
+                    }
+                    stringBuilder.Append('>');
+                }
+                void append()
+                {
+                    begin = end + 1;
+                    end = i;
+                    if (begin < end)
+                    {
+                        if (isParsingGenericArgCount)
+                            appendGenericArguments();
+                        else
+                            appendNoGenericArgument();
+                    }
+                }
+
+                for (; i < typeName.Length; i++)
+                {
+                    if (isParsingGenericArgCount && !char.IsDigit(typeName[i]))
+                    {
+                        append();
+                        isParsingGenericArgCount = false;
+                    }
+
+                    if (typeName[i] == '`')
+                    {
+                        append();
+                        isParsingGenericArgCount = true;
+                    }
+                }
+
+                append();
+            }
+            else
+            {
+                stringBuilder.Append(type.FullName);
+            }
+
+            stringBuilder.Replace('+', '.');
+
+            string result = stringBuilder.ToString();
+
+            StringBuilderPool.Release(stringBuilder);
+
+            return result;
+        }
+
         public static string GetPrettyName(this Type type)
         {
-            if (type.IsGenericType)
+            if (type.IsArray)
+            {
+                return type.GetElementType().GetPrettyName() + "[]";
+            }
+            else if (type.IsGenericType)
             {
                 StringBuilder stringBuilder = StringBuilderPool.Take();
 
                 string typeName = type.Name;
-                string typeNameNoGenerics = typeName.Substring(0, typeName.IndexOf('`'));
+                int indexOfGenericArguments = typeName.IndexOf('`');
+                int genericArgCount = typeName.ParseInt(indexOfGenericArguments + 1);
+                string typeNameNoGenerics = typeName.Substring(0, indexOfGenericArguments);
+
 
                 stringBuilder.Append(typeNameNoGenerics);
                 stringBuilder.Append("<");
-                foreach (Type genericArg in type.GenericTypeArguments)
+                var genericArgs = type.GenericTypeArguments;
+                for (int i = genericArgs.Length - genericArgCount; i < genericArgs.Length; i++)
                 {
-                    stringBuilder.Append(GetPrettyName(genericArg));
+                    stringBuilder.Append(GetPrettyName(genericArgs[i]));
+                    if (i < genericArgs.Length - 1 && genericArgCount > 1)
+                    {
+                        stringBuilder.Append(", ");
+                    }
                 }
                 stringBuilder.Append(">");
 

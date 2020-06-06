@@ -1,6 +1,32 @@
 ﻿
 public static class StringExtensions
 {
+    public static int ParseInt(this string txt, int index) => txt.ParseInt(ref index);
+
+    public static int ParseInt(this string txt, ref int index)
+    {
+        int begin = index;
+        while (index < txt.Length && char.IsDigit(txt[index]))
+        {
+            index++;
+        }
+
+        return int.Parse(txt.Substring(begin, index - begin));
+    }
+
+    public static bool TryParseInt(this string txt, int index, out int result) => txt.TryParseInt(ref index, out result);
+
+    public static bool TryParseInt(this string txt, ref int index, out int result)
+    {
+        int begin = index;
+        while (index < txt.Length && char.IsDigit(txt[index]))
+        {
+            index++;
+        }
+
+        return int.TryParse(txt.Substring(begin, index - begin), out result);
+    }
+
     public static string TrimEnd(this string txt, int index)
     {
         if (index >= txt.Length)
