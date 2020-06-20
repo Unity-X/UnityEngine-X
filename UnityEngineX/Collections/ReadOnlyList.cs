@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Xml.XPath;
 
 /// <summary>
 /// This is like the ReadOnlyCollection provided by .NET but in struct (instead of class) meaning it does't produce garbage
@@ -21,6 +21,17 @@ public struct ReadOnlyList<T>
     public void CopyTo(T[] array, int index) => _list.CopyTo(array, index);
     public int IndexOf(T value) => _list.IndexOf(value);
     public T Find(Predicate<T> match) => _list.Find(match);
+    public T[] ToArray() => _list.ToArray();
+
+    public ReadOnlyListDynamic<U> DynamicCast<U>()
+    {
+        if (!typeof(U).IsAssignableFrom(typeof(T)))
+        {
+            throw new Exception($"Type {typeof(U).Name} is not assignable from {typeof(T).Name}");
+        }
+
+        return new ReadOnlyListDynamic<U>(_list);
+    }
 
     #region Enumerator
     public Enumerator GetEnumerator() => new Enumerator(_list);
@@ -53,61 +64,47 @@ public struct ReadOnlyList<T>
 /// <summary>
 /// This is like the ReadOnlyCollection provided by .NET but in struct (instead of class) meaning it doesn't produce garbage
 /// </summary>
-public struct ReadOnlyList<ListType, ReadType>
-    where ListType : ReadType
+public struct ReadOnlyListDynamic<T>
 {
-    readonly List<ListType> _list;
+    readonly IList _list;
 
-    public ReadOnlyList(List<ListType> list)
+    public ReadOnlyListDynamic(IList list)
     {
         _list = list ?? throw new System.NullReferenceException();
     }
 
-    public ReadType this[int index] => _list[index];
+    public T this[int index] => (T)_list[index];
     public int Count => _list.Count;
-    public bool Contains(ListType value) => _list.Contains(value);
-    public bool Contains(ReadType value)
+    public bool Contains(T value) => _list.Contains(value);
+    public void CopyTo(T[] array, int index) => _list.CopyTo(array, index);
+    public int IndexOf(T value) => _list.IndexOf(value);
+    public T[] ToArray()
     {
-        if (value is ListType)
-            return _list.Contains((ListType)value);
-        return false;
-    }
-
-    public void CopyTo(ListType[] array, int index) => _list.CopyTo(array, index);
-    public int IndexOf(ListType value) => _list.IndexOf(value);
-    public int IndexOf(ReadType value)
-    {
-        if (value is ListType)
-            return _list.IndexOf((ListType)value);
-        return -1;
-    }
-    public ReadType Find(Predicate<ReadType> match)
-    {
-        for (int i = 0; i < _list.Count; i++)
+        T[] result = new T[_list.Count];
+        for (int i = 0; i < result.Length; i++)
         {
-            if (match(_list[i]))
-                return _list[i];
+            result[i] = (T)_list[i];
         }
-        return default;
+        return result;
     }
 
     #region Enumerator
-    public Enumerator GetEnumerator() => new Enumerator(_list);
+    public Enumerator<T> GetEnumerator() => new Enumerator<T>(_list);
 
-    public struct Enumerator
+    public struct Enumerator<U>
     {
-        readonly IList<ListType> _entities;
+        readonly IList _elements;
         int _i;
         int _count;
 
-        public Enumerator(IList<ListType> entities)
+        public Enumerator(IList entities)
         {
-            _entities = entities;
-            _count = _entities.Count;
+            _elements = entities;
+            _count = _elements.Count;
             _i = -1;
         }
 
-        public ReadType Current => _entities[_i];
+        public U Current => (U)_elements[_i];
 
         public bool MoveNext()
         {
@@ -123,10 +120,5 @@ public static class ReadOnlyListExtensions
     public static ReadOnlyList<ListType> AsReadOnlyNoAlloc<ListType>(this List<ListType> list)
     {
         return new ReadOnlyList<ListType>(list);
-    }
-    public static ReadOnlyList<ListType, ReadType> AsReadOnlyNoAlloc<ListType, ReadType>(this List<ListType> list)
-        where ListType : ReadType
-    {
-        return new ReadOnlyList<ListType, ReadType>(list);
     }
 }
