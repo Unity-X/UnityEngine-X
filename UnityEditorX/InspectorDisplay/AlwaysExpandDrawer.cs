@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using UnityEngineX.InspectorDisplay;
 
-namespace UnityEngineX.InspectorDisplay
+namespace UnityEditorX.InspectorDisplay
 {
     [CustomPropertyDrawer(typeof(AlwaysExpandAttribute))]
     public class AlwaysExpandDrawer : PropertyDrawer

@@ -3,7 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngineX;
 
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_ASSERT", "Enables asserts with Log.Assert(..). If disabled, all calls to these methods are stripped from the build.")]
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_ERROR", "Enables errors logs with Log.Error(..). If disabled, all calls to these methods are stripped from the build.")]
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_INFO", "Enables info logs with Log.Info(..). If disabled, all calls to these methods are stripped from the build.")]
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_EXCEPTION", "Enables exception logs with Log.Exception(..). If disabled, all calls to these methods are stripped from the build.")]
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_WARNING", "Enables warning logs with Log.Warning(..). If disabled, all calls to these methods are stripped from the build.")]
 
 namespace UnityX
 {

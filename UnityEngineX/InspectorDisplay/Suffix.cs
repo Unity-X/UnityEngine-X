@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace CCC.InspectorDisplay
+namespace UnityEngineX.InspectorDisplay
 {
     public class Suffix : PropertyAttribute
     {

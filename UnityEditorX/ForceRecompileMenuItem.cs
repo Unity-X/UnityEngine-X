@@ -2,17 +2,20 @@
 using UnityEditor;
 using UnityEngine;
 
-public static class ForceRecompileMenuItem
+namespace UnityEditorX
 {
-    [MenuItem("Tools/Force Recompile")]
-    private static void ForceRecompile()
+    internal static class ForceRecompileMenuItem
     {
-        UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
-    }
+        [MenuItem("Tools/Force Recompile")]
+        private static void ForceRecompile()
+        {
+            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+        }
 
-    [MenuItem("Tools/Force Recompile", validate = true)]
-    private static bool ForceRecompile_Validate()
-    {
-        return !Application.isPlaying;
+        [MenuItem("Tools/Force Recompile", validate = true)]
+        private static bool ForceRecompile_Validate()
+        {
+            return !Application.isPlaying;
+        }
     }
 }

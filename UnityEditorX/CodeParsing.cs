@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngineX;
 
-namespace UnityEngineX
+namespace UnityEditorX
 {
     public static class CodeParsing
     {
@@ -108,7 +109,7 @@ namespace UnityEngineX
                                 termIsMadeOfLetters = true;
                             }
                         }
-                        else if (ConsiderSpecialCharactersTerms && !char.IsWhiteSpace(c) && !char.IsSeparator(c))
+                        else if (ConsiderSpecialCharactersTerms && !char.IsWhiteSpace(c) && !char.IsSeparator(c) && c != '\t')
                         {
                             if (termBegin != -1)
                             {

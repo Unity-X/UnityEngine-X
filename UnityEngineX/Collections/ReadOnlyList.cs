@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml.XPath;
 
+namespace UnityEngineX
+{
 /// <summary>
 /// This is like the ReadOnlyCollection provided by .NET but in struct (instead of class) meaning it does't produce garbage
 /// </summary>
@@ -121,4 +122,5 @@ public static class ReadOnlyListExtensions
     {
         return new ReadOnlyList<ListType>(list);
     }
+}
 }

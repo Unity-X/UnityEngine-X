@@ -1,39 +1,124 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Design.Serialization;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityX;
 
 namespace UnityEngineX
 {
     public static class TypeUtility
     {
+        public static IEnumerable<MethodInfo> GetStaticMethodsWithAttribute(Type attributeType)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType).Where(m => m.IsStatic);
+#else
+
+            Assembly attributeAssembly = attributeType.Assembly;
+            ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
+            List<Thread> threads = new List<Thread>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // assembly must be referencing type
+                if (assembly != attributeAssembly && !assembly.GetReferencedAssemblies().Contains(attributeAssembly))
+                    continue;
+
+                var t = new Thread(() =>
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                        {
+                            if (Attribute.IsDefined(method, attributeType))
+                                result.Add(method);
+                        }
+                    }
+                });
+
+                threads.Add(t);
+
+                t.Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            return result;
+#endif
+        }
+        public static IEnumerable<MethodInfo> GetMethodsWithAttribute(Type attributeType)
+        {
+#if UNITY_EDITOR
+            return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType);
+#else
+
+            Assembly attributeAssembly = attributeType.Assembly;
+
+            ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
+            List<Thread> threads = new List<Thread>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // assembly must be referencing type
+                if (assembly != attributeAssembly && !assembly.GetReferencedAssemblies().Contains(attributeAssembly))
+                    continue;
+
+                var t = new Thread(() =>
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
+                        {
+                            if (Attribute.IsDefined(method, attributeType))
+                                result.Add(method);
+                        }
+                    }
+                });
+
+                threads.Add(t);
+
+                t.Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            return result;
+#endif
+        }
+
         public static IEnumerable<Type> GetTypesDerivedFrom(Type baseType)
         {
 #if UNITY_EDITOR
             return UnityEditor.TypeCache.GetTypesDerivedFrom(baseType);
 #else
+            Assembly baseTypeAssembly = baseType.Assembly;
+            List<Type> result = new List<Type>(128);
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // assembly must be referencing type
+                if (assembly != baseTypeAssembly && !assembly.GetReferencedAssemblies().Contains(baseTypeAssembly))
+                    continue;
 
-            Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-            //Assembly baseTypeAssembly = baseType.Assembly;
-            //string assemblyName = baseTypeAssembly.GetName().Name;
+                foreach (var type in assembly.GetTypes())
+                {
+                    if (type != baseType && baseType.IsAssignableFrom(type))
+                        result.Add(type);
+                }
+            }
 
-
-            return
-
-                // Join results
-                Concat(assemblies
-
-                    //// Assemblies that reference T's assembly (or T's assembly itself)
-                    //.Where(assembly => assembly == baseTypeAssembly || assembly.GetReferencedAssemblies().Contains(x => x.Name == assemblyName))
-
-                        // Get types in assembly
-                        .Select(assembly => assembly.GetTypes()
-
-                            // Get all types that inherit from T
-                            .Where(type => baseType.IsAssignableFrom(type) && type != baseType)));
+            return result;
 #endif
         }
 
@@ -161,7 +246,7 @@ namespace UnityEngineX
             }
         }
 
-        private static IEnumerable<T> Concat<T>(IEnumerable<IEnumerable<T>> sequences)
+        private static IEnumerable<T> Concat<T>(this IEnumerable<IEnumerable<T>> sequences)
         {
             return sequences.SelectMany(x => x);
         }
@@ -189,6 +274,11 @@ namespace UnityEngineX
                 }
                 return null;
             }
+        }
+
+        public static bool IsAsync(this MethodInfo methodInfo)
+        {
+            return Attribute.IsDefined(methodInfo, typeof(AsyncStateMachineAttribute));
         }
     }
 }
