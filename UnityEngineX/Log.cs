@@ -11,7 +11,7 @@ using UnityEngineX;
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_EXCEPTION", "Enables exception logs with Log.Exception(..). If disabled, all calls to these methods are stripped from the build.")]
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_WARNING", "Enables warning logs with Log.Warning(..). If disabled, all calls to these methods are stripped from the build.")]
 
-namespace UnityX
+namespace UnityEngineX
 {
     public class LogChannel
     {

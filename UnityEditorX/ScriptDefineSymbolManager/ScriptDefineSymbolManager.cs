@@ -5,7 +5,6 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using UnityEngineX;
-using UnityX;
 using static UnityEditorX.ScriptDefineSymbolManagerSettings;
 
 namespace UnityEditorX
