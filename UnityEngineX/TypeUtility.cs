@@ -22,13 +22,14 @@ namespace UnityEngineX
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType).Where(m => m.IsStatic);
 #else
 
-            Assembly attributeAssembly = attributeType.Assembly;
+            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
+
             ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
             List<Thread> threads = new List<Thread>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // assembly must be referencing type
-                if (assembly != attributeAssembly && !assembly.GetReferencedAssemblies().Contains(attributeAssembly))
+                if (!assembly.CanAccessAssembly(attributeAssemblyName))
                     continue;
 
                 var t = new Thread(() =>
@@ -62,14 +63,14 @@ namespace UnityEngineX
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType);
 #else
 
-            Assembly attributeAssembly = attributeType.Assembly;
+            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
 
             ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
             List<Thread> threads = new List<Thread>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // assembly must be referencing type
-                if (assembly != attributeAssembly && !assembly.GetReferencedAssemblies().Contains(attributeAssembly))
+                if (!assembly.CanAccessAssembly(attributeAssemblyName))
                     continue;
 
                 var t = new Thread(() =>
@@ -98,17 +99,29 @@ namespace UnityEngineX
 #endif
         }
 
+        public static bool CanAccessAssembly(this Assembly assembly, string assemblyName)
+        {
+            if (assembly.GetName().Name.Equals(assemblyName))
+                return true;
+
+            var referencedAssemblies = assembly.GetReferencedAssemblies();
+            foreach (var referenced in referencedAssemblies)
+                if (referenced.Name.Equals(assemblyName))
+                    return true;
+            return false;
+        }
+
         public static IEnumerable<Type> GetTypesDerivedFrom(Type baseType)
         {
 #if UNITY_EDITOR
             return UnityEditor.TypeCache.GetTypesDerivedFrom(baseType);
 #else
-            Assembly baseTypeAssembly = baseType.Assembly;
+            string baseTypeAssemblyName = baseType.Assembly.GetName().Name;
             List<Type> result = new List<Type>(128);
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // assembly must be referencing type
-                if (assembly != baseTypeAssembly && !assembly.GetReferencedAssemblies().Contains(baseTypeAssembly))
+                if (!assembly.CanAccessAssembly(baseTypeAssemblyName))
                     continue;
 
                 foreach (var type in assembly.GetTypes())
