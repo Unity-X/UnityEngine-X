@@ -205,7 +205,25 @@ namespace UnityEngineX
             return result;
         }
 
-        public static string GetPrettyName(this Type type)
+        private static readonly Dictionary<Type, string> s_shorthandMap = new Dictionary<Type, string>
+        {
+            { typeof(Boolean), "bool" },
+            { typeof(Byte), "byte" },
+            { typeof(Char), "char" },
+            { typeof(Decimal), "decimal" },
+            { typeof(Double), "double" },
+            { typeof(Single), "float" },
+            { typeof(Int32), "int" },
+            { typeof(Int64), "long" },
+            { typeof(SByte), "sbyte" },
+            { typeof(Int16), "short" },
+            { typeof(String), "string" },
+            { typeof(UInt32), "uint" },
+            { typeof(UInt64), "ulong" },
+            { typeof(UInt16), "ushort" },
+        };
+
+        public static string GetPrettyName(this Type type, bool shorthandFormIfPossible = true)
         {
             if (type.IsArray)
             {
@@ -242,6 +260,8 @@ namespace UnityEngineX
             }
             else
             {
+                if (shorthandFormIfPossible && s_shorthandMap.TryGetValue(type, out string result))
+                    return result;
                 return type.Name;
             }
         }
