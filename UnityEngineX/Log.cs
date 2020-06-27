@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngineX;
@@ -17,9 +18,11 @@ namespace UnityEngineX
     {
         internal LogChannel() { }
 
-        public string DisplayName { get; internal set; }
+        public string Name { get; internal set; }
         public int Id { get; internal set; }
         public bool Active { get; internal set; }
+
+        internal bool ActiveByDefault { get; set; }
     }
 
     public static class Log
@@ -27,7 +30,7 @@ namespace UnityEngineX
         public static class Internals
         {
             public delegate void LogCallback(int channelId, string condition, string stackTrace, LogType logType);
-            
+
             public static void ForceInitialize() => Log.Initialize();
 
             public static event LogCallback LogMessageReceived
@@ -54,27 +57,44 @@ namespace UnityEngineX
                 return result;
             }
 
-            internal static LogChannel CreateChannel(string displayName, bool activeByDefault = true)
+            internal static LogChannel CreateChannel(string name, bool activeByDefault = true)
             {
                 s_channelsLock.EnterWriteLock();
 
-                var newChannel = new LogChannel()
-                {
-                    DisplayName = displayName,
-                    Id = s_channels.Count,
-                    Active = activeByDefault
-                };
+                LogChannel newChannel;
 
-                s_channels.Add(newChannel);
+                if (s_channels.Any(c => c.Name == name))
+                {
+                    Log.Error($"Log channel with named {name} already exists.");
+                    newChannel = null;
+                }
+                else
+                {
+                    newChannel = new LogChannel()
+                    {
+                        Name = name,
+                        Id = s_channels.Count,
+                        ActiveByDefault = activeByDefault,
+                        Active = IsActiveInSettings(name, activeByDefault)
+                    };
+
+                    s_channels.Add(newChannel);
+                }
 
                 s_channelsLock.ExitWriteLock();
 
                 return newChannel;
             }
 
-            internal static void ActivateChannel(LogChannel channel, bool value)
+            internal static void SetChannelActive(LogChannel channel, bool value)
             {
+                if (channel is null)
+                {
+                    throw new ArgumentNullException(nameof(channel));
+                }
+
                 channel.Active = value;
+                SetActiveInSettings(channel.Name, value);
             }
 
             internal static LogChannel GetChannel(int id)
@@ -89,6 +109,29 @@ namespace UnityEngineX
                 }
 
                 return foundChannel;
+            }
+
+            internal static void Initialize()
+            {
+                s_channelsLock.EnterReadLock();
+                foreach (var item in s_channels)
+                {
+                    item.Active = IsActiveInSettings(item.Name, item.ActiveByDefault);
+                }
+                s_channelsLock.ExitReadLock();
+            }
+
+            private static bool IsActiveInSettings(string name, bool activeByDefault)
+            {
+                if (s_initialized)
+                    return PlayerPrefs.GetInt(name, defaultValue: activeByDefault ? 1 : 0) == 1;
+                else
+                    return true;
+            }
+            private static void SetActiveInSettings(string name, bool active)
+            {
+                PlayerPrefs.SetInt(name, active ? 1 : 0);
+                PlayerPrefs.Save();
             }
         }
 
@@ -109,6 +152,8 @@ namespace UnityEngineX
 
             Application.logMessageReceived += OnMessageReceived_DebugLog;
             Application.logMessageReceivedThreaded += OnMessageReceived_DebugLog_Threaded;
+
+            Initialize();
         }
 
         private static void OnMessageReceived_DebugLog(string condition, string stackTrace, LogType type)
@@ -153,6 +198,11 @@ namespace UnityEngineX
                 channelId = -1;
             }
         }
+
+        public static LogChannel CreateChannel(string name, bool activeByDefault = true) => ChannelManager.CreateChannel(name, activeByDefault);
+        public static void SetChannelActive(LogChannel channel, bool value) => ChannelManager.SetChannelActive(channel, value);
+        public static LogChannel[] GetChannels() => ChannelManager.GetChannels();
+        public static LogChannel GetChannel(int id) => ChannelManager.GetChannel(id);
 
         [System.Diagnostics.Conditional("UNITY_X_LOG_ASSERT")]
         public static void Assert(int channelId, bool condition, string message, UnityEngine.Object context)
