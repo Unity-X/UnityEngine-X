@@ -16,104 +16,37 @@ namespace UnityEngineX
 {
     public static class TypeUtility
     {
+        public static IEnumerable<PropertyInfo> GetStaticPropertiesWithAttribute(Type attributeType)
+        {
+            return GetMembersWithAttribute(attributeType, t => t.GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static));
+        }
+
+        public static IEnumerable<FieldInfo> GetStaticFieldsWithAttribute(Type attributeType)
+        {
+            return GetMembersWithAttribute(attributeType, t => t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static));
+        }
+
         public static IEnumerable<MethodInfo> GetStaticMethodsWithAttribute(Type attributeType)
         {
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType).Where(m => m.IsStatic);
 #else
-
-            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
-
-            ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
-            List<Thread> threads = new List<Thread>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                // assembly must be referencing type
-                if (!assembly.CanAccessAssembly(attributeAssemblyName))
-                    continue;
-
-                var t = new Thread(() =>
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
-                        {
-                            if (Attribute.IsDefined(method, attributeType))
-                                result.Add(method);
-                        }
-                    }
-                });
-
-                threads.Add(t);
-
-                t.Start();
-            }
-
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
-
-            return result;
+            return GetMembersWithAttribute(attributeType, t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static));
 #endif
         }
+
         public static IEnumerable<MethodInfo> GetMethodsWithAttribute(Type attributeType)
         {
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType);
 #else
-
-            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
-
-            ConcurrentBag<MethodInfo> result = new ConcurrentBag<MethodInfo>();
-            List<Thread> threads = new List<Thread>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                // assembly must be referencing type
-                if (!assembly.CanAccessAssembly(attributeAssemblyName))
-                    continue;
-
-                var t = new Thread(() =>
-                {
-                    foreach (var type in assembly.GetTypes())
-                    {
-                        foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static))
-                        {
-                            if (Attribute.IsDefined(method, attributeType))
-                                result.Add(method);
-                        }
-                    }
-                });
-
-                threads.Add(t);
-
-                t.Start();
-            }
-
-            foreach (var thread in threads)
-            {
-                thread.Join();
-            }
-
-            return result;
+            return GetMembersWithAttribute(attributeType, t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.NonPublic));
 #endif
-        }
-
-        public static bool CanAccessAssembly(this Assembly assembly, string assemblyName)
-        {
-            if (assembly.GetName().Name.Equals(assemblyName))
-                return true;
-
-            var referencedAssemblies = assembly.GetReferencedAssemblies();
-            foreach (var referenced in referencedAssemblies)
-                if (referenced.Name.Equals(assemblyName))
-                    return true;
-            return false;
         }
 
         public static IEnumerable<Type> GetTypesDerivedFrom(Type baseType)
         {
-#if UNITY_EDITOR
+#if !UNITY_EDITOR
             return UnityEditor.TypeCache.GetTypesDerivedFrom(baseType);
 #else
             string baseTypeAssemblyName = baseType.Assembly.GetName().Name;
@@ -134,6 +67,56 @@ namespace UnityEngineX
             return result;
 #endif
         }
+
+        public static bool CanAccessAssembly(this Assembly assembly, string assemblyName)
+        {
+            if (assembly.GetName().Name.Equals(assemblyName))
+                return true;
+
+            var referencedAssemblies = assembly.GetReferencedAssemblies();
+            foreach (var referenced in referencedAssemblies)
+                if (referenced.Name.Equals(assemblyName))
+                    return true;
+            return false;
+        }
+
+        private static IEnumerable<T> GetMembersWithAttribute<T>(Type attributeType, Func<Type, T[]> getMembersOfType) where T : MemberInfo
+        {
+            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
+
+            ConcurrentBag<T> result = new ConcurrentBag<T>();
+            List<Thread> threads = new List<Thread>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // assembly must be referencing type
+                if (!assembly.CanAccessAssembly(attributeAssemblyName))
+                    continue;
+
+                var t = new Thread(() =>
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        foreach (var member in getMembersOfType(type))
+                        {
+                            if (Attribute.IsDefined(member, attributeType))
+                                result.Add(member);
+                        }
+                    }
+                });
+
+                threads.Add(t);
+
+                t.Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            return result;
+        }
+
 
         public static string GetPrettyFullName(this Type type)
         {

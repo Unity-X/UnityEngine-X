@@ -121,16 +121,18 @@ namespace UnityEngineX
                 s_channelsLock.ExitReadLock();
             }
 
+            private const string KEY_PREFIX = "unity-x-log-channel-";
+
             private static bool IsActiveInSettings(string name, bool activeByDefault)
             {
                 if (s_initialized)
-                    return PlayerPrefs.GetInt(name, defaultValue: activeByDefault ? 1 : 0) == 1;
+                    return PlayerPrefs.GetInt(KEY_PREFIX + name, defaultValue: activeByDefault ? 1 : 0) == 1;
                 else
                     return true;
             }
             private static void SetActiveInSettings(string name, bool active)
             {
-                PlayerPrefs.SetInt(name, active ? 1 : 0);
+                PlayerPrefs.SetInt(KEY_PREFIX + name, active ? 1 : 0);
                 PlayerPrefs.Save();
             }
         }
