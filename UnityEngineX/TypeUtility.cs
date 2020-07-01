@@ -28,7 +28,7 @@ namespace UnityEngineX
 
         public static IEnumerable<MethodInfo> GetStaticMethodsWithAttribute(Type attributeType)
         {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType).Where(m => m.IsStatic);
 #else
             return GetMembersWithAttribute(attributeType, t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static));
@@ -37,7 +37,7 @@ namespace UnityEngineX
 
         public static IEnumerable<MethodInfo> GetMethodsWithAttribute(Type attributeType)
         {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             return UnityEditor.TypeCache.GetMethodsWithAttribute(attributeType);
 #else
             return GetMembersWithAttribute(attributeType, t => t.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.NonPublic));
@@ -46,7 +46,7 @@ namespace UnityEngineX
 
         public static IEnumerable<Type> GetTypesDerivedFrom(Type baseType)
         {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             return UnityEditor.TypeCache.GetTypesDerivedFrom(baseType);
 #else
             string baseTypeAssemblyName = baseType.Assembly.GetName().Name;
