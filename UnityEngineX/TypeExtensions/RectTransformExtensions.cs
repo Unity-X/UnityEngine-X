@@ -41,7 +41,12 @@ namespace UnityEngineX
             }
             else
             {
-                return rectTr.GetRectRelativeTo((RectTransform)canvas.transform);
+                Rect rect =  rectTr.GetRectRelativeTo((RectTransform)canvas.transform);
+
+                rect.position *= canvas.scaleFactor;
+                rect.size *= canvas.scaleFactor;
+
+                return rect;
             }
         }
     }
