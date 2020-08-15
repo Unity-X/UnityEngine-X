@@ -90,12 +90,20 @@ namespace UnityEditorX
         /// </summary>
         public static T LoadOrCreateScriptableObjectAsset<T>(string path) where T : ScriptableObject, new()
         {
+            return LoadOrCreateAsset(path, () => ScriptableObject.CreateInstance<T>());
+        }
+
+        /// <summary>
+        /// Don't forget the .asset extension
+        /// </summary>
+        public static T LoadOrCreateAsset<T>(string path, Func<T> createFunc) where T : UnityEngine.Object
+        {
             T asset = AssetDatabase.LoadAssetAtPath<T>(path);
 
             if (asset == null)
             {
                 AssetDatabaseX.CreateFolderFromPath(path.Remove(path.LastIndexOf('/')));
-                AssetDatabase.CreateAsset(ScriptableObject.CreateInstance<T>(), path);
+                AssetDatabase.CreateAsset(createFunc(), path);
                 asset = AssetDatabase.LoadAssetAtPath<T>(path);
             }
 
@@ -104,7 +112,7 @@ namespace UnityEditorX
 
         public static void CreateFolderFromPath(string path)
         {
-            CreateFolderFromPath(path, out string dummy);
+            CreateFolderFromPath(path, out string _);
         }
         public static void CreateFolderFromPath(string path, out string folderGuid)
         {
@@ -118,8 +126,7 @@ namespace UnityEditorX
                 string parentPath = steps[0];
                 if (currentPath != "Assets")
                 {
-                    Debug.LogError("the path should start with Assets/");
-                    return;
+                    throw new Exception("The path should start with Assets/");
                 }
 
                 for (int i = 1; i < steps.Length; i++) // NB: we start at i=1 to skip the 'Asset/'

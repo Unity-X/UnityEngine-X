@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using UnityEngine;
 using UnityEngineX;
@@ -11,6 +13,7 @@ using UnityEngineX;
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_INFO", "Enables info logs with Log.Info(..). If disabled, all calls to these methods are stripped from the build.")]
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_EXCEPTION", "Enables exception logs with Log.Exception(..). If disabled, all calls to these methods are stripped from the build.")]
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_WARNING", "Enables warning logs with Log.Warning(..). If disabled, all calls to these methods are stripped from the build.")]
+[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_METHOD", "Enables method logs with Log.Method(..). If disabled, all calls to these methods are stripped from the build.")]
 
 namespace UnityEngineX
 {
@@ -503,5 +506,31 @@ namespace UnityEngineX
         public static void WarningFormat(UnityEngine.Object context, string format, params object[] args) { Debug.LogWarningFormat(context, format, args); }
         [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
         public static void WarningFormat(string format, params object[] args) { Debug.LogWarningFormat(format, args); }
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
+        public static void Method([CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        {
+            Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}");
+        }
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
+        public static void Method(object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        {
+            Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
+        }
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
+        public static void Method(int channelId, object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        {
+            if (TryUseChannel(channelId))
+                Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
+        }
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
+        public static void Method(LogChannel channel, object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        {
+            if (TryUseChannel(channel.Id))
+                Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
+        }
     }
 }
