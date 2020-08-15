@@ -507,27 +507,32 @@ namespace UnityEngineX
         [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
         public static void WarningFormat(string format, params object[] args) { Debug.LogWarningFormat(format, args); }
 
+
+        // This struct is used to mark the end of user-arguments when calling Method(..).
+        // Without this, calling Method("hello") will take the wrong method
+        public struct ArgEnd { }
+
         [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method([CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        public static void Method(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
         {
             Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}");
         }
 
         [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        public static void Method(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
         {
             Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
         }
 
         [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(int channelId, object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        public static void Method(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
         {
             if (TryUseChannel(channelId))
                 Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
         }
 
         [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(LogChannel channel, object message, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+        public static void Method(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
         {
             if (TryUseChannel(channel.Id))
                 Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
