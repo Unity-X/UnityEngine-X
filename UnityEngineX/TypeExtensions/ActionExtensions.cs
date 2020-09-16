@@ -86,7 +86,7 @@ namespace UnityEngineX
 
         static private void Log(Exception exception, LogMode logMode)
         {
-            string message = $"Error in SafeInvoke: {exception.Message}  \nStack:" + exception.StackTrace;
+            string message = $"Error in action invoke: {exception.Message}  \nStack:" + exception.StackTrace;
 
             switch (logMode)
             {
