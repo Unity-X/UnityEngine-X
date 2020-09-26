@@ -8,9 +8,17 @@ namespace UnityEditorX
 {
     public static class AssetDatabaseX
     {
+        /// <summary>
+        /// Returns a list of asset GUIDs
+        /// </summary>
+        public static string[] FindAssetsOfType<T>() where T : UnityEngine.Object
+        {
+            return AssetDatabase.FindAssets($"t:{typeof(T)}");
+        }
+
         public static List<T> LoadAssetsOfType<T>() where T : UnityEngine.Object
         {
-            string[] guids = AssetDatabase.FindAssets($"t:{typeof(T)}");
+            string[] guids = FindAssetsOfType<T>();
             List<T> assets = new List<T>(guids.Length);
             for (int i = 0; i < guids.Length; i++)
             {
