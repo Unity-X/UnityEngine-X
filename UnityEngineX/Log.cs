@@ -104,12 +104,12 @@ namespace UnityEngineX
             {
                 LogChannel foundChannel = null;
 
+                s_channelsLock.EnterReadLock();
                 if (id >= 0 && id < s_channels.Count)
                 {
-                    s_channelsLock.EnterReadLock();
                     foundChannel = s_channels[id];
-                    s_channelsLock.ExitReadLock();
                 }
+                s_channelsLock.ExitReadLock();
 
                 return foundChannel;
             }
@@ -144,6 +144,13 @@ namespace UnityEngineX
 
         private static event Internals.LogCallback LogMessageReceived;
         private static event Internals.LogCallback LogMessageReceivedThreaded;
+
+        public static readonly bool Enabled
+#if UNITY_X_LOG_ASSERT || UNITY_X_LOG_ERROR || UNITY_X_LOG_INFO || UNITY_X_LOG_EXCEPTION || UNITY_X_LOG_WARNING || UNITY_X_LOG_METHOD
+             = true;
+#else
+             = false;
+#endif
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod] // initializes in editor
