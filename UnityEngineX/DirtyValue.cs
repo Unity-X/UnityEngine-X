@@ -86,6 +86,8 @@ public struct DirtyValue<T>
     {
         _notForcedDirty = false;
     }
+
+    public static implicit operator T(DirtyValue<T> dirtyValue) => dirtyValue.Get();
 }
 
 /// <summary>
@@ -172,4 +174,6 @@ public struct DirtyRef<T>
     {
         _notForcedDirty = false;
     }
+
+    public static implicit operator T(DirtyRef<T> dirtyValue) => dirtyValue.Get();
 }
