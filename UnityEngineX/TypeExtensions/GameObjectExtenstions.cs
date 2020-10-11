@@ -9,7 +9,7 @@ namespace UnityEngineX
     {
         public static bool HasComponent<T>(this GameObject gameObject)
         {
-            return gameObject.GetComponent<T>() != null;
+            return gameObject.TryGetComponent<T>(out _);
         }
 
         public static T GetOrAddComponent<T>(this GameObject gameObject) where T : Component
