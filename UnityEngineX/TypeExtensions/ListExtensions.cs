@@ -18,14 +18,26 @@ namespace UnityEngineX
             }
             return -1;
         }
+        
         public static void RemoveFirst<T>(this List<T> list)
         {
             list.RemoveAt(0);
         }
+
         public static int RemoveNulls<T>(this List<T> list)
         {
-            return list.RemoveAll((x) => x == null);
+            int c = 0;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (list[i] == null)
+                {
+                    c++;
+                    list.RemoveAt(i);
+                }
+            }
+            return c;
         }
+
         public static void RemoveLast<T>(this List<T> list)
         {
             int index = list.LastIndex();
@@ -34,6 +46,7 @@ namespace UnityEngineX
                 list.RemoveAt(index);
             }
         }
+
         public static bool RemoveWithLastSwap<T>(this List<T> list, T value)
         {
             int index = list.IndexOf(value);
@@ -47,6 +60,7 @@ namespace UnityEngineX
                 return false;
             }
         }
+
         public static void RemoveWithLastSwapAt<T>(this List<T> list, int index)
         {
             int lastIndex = list.Count - 1;
@@ -63,7 +77,6 @@ namespace UnityEngineX
 
             list.RemoveAt(lastIndex);
         }
-
 
         public static void RemoveFrom<T>(this List<T> list, int index)
         {
@@ -109,10 +122,12 @@ namespace UnityEngineX
         {
             return list[0];
         }
+
         public static T Last<T>(this List<T> list)
         {
             return list[list.Count - 1];
         }
+
         public static int LastIndex<T>(this List<T> list)
         {
             return list.Count - 1;
