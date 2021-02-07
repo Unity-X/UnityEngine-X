@@ -56,7 +56,7 @@ public struct DirtyValue<T>
     /// <summary>
     /// Set the value
     /// </summary>
-    public void Set(in T value)
+    public void Set(T value)
     {
         if (_cleared)
         {
@@ -144,7 +144,7 @@ public struct DirtyRef<T>
     /// <summary>
     /// Set the value
     /// </summary>
-    public void Set(in T value)
+    public void Set(T value)
     {
         if (_cleared)
         {

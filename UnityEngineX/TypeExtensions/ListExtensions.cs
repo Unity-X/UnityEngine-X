@@ -227,7 +227,7 @@ namespace UnityEngineX
             return -1;
         }
 
-        public static bool AddUnique<T>(this List<T> list, in T value)
+        public static bool AddUnique<T>(this List<T> list, T value)
         {
             if (!list.Contains(value))
             {
@@ -240,7 +240,7 @@ namespace UnityEngineX
             }
         }
 
-        public static void AddRange<T>(this List<T> list, in T value, int count)
+        public static void AddRange<T>(this List<T> list, T value, int count)
         {
             for (int i = 0; i < count; i++)
             {
