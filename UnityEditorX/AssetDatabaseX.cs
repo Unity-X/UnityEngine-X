@@ -16,6 +16,11 @@ namespace UnityEditorX
             return AssetDatabase.FindAssets($"t:{typeof(T)}");
         }
 
+        public static T LoadAssetWithGUID<T>(string guid) where T : UnityEngine.Object
+        {
+            return AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
+        }
+
         public static List<T> LoadAssetsOfType<T>() where T : UnityEngine.Object
         {
             string[] guids = FindAssetsOfType<T>();
