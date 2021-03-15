@@ -4,7 +4,7 @@ namespace UnityEngineX
 {
     public class ArrayX
     {
-        public static T[] Slice<T>(T[] array, int index, int count)
+        public static T[] SubArray<T>(T[] array, int index, int count)
         {
             if (count > array.Length)
                 throw new ArgumentOutOfRangeException(nameof(count));
