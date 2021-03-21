@@ -37,7 +37,7 @@ namespace UnityEditorX
             return assets;
         }
 
-        public static List<GameObject> LoadPrefabsAsets()
+        public static List<GameObject> LoadPrefabsAssets()
         {
             string[] guids = AssetDatabase.FindAssets($"t:prefab");
             List<GameObject> assets = new List<GameObject>(guids.Length);
@@ -70,7 +70,7 @@ namespace UnityEditorX
 
         public static List<GameObject> LoadPrefabAssetsWithComponentOnRoot<T>() where T : UnityEngine.Component
         {
-            List<GameObject> prefabAssets = LoadPrefabsAsets();
+            List<GameObject> prefabAssets = LoadPrefabsAssets();
 
             for (int i = 0; i < prefabAssets.Count; i++)
             {
