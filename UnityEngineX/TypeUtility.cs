@@ -117,6 +117,51 @@ namespace UnityEngineX
             return result;
         }
 
+        private static IEnumerable<Type> Internal_GetTypesWithAttribute(Type attributeType)
+        {
+            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
+
+            ConcurrentBag<Type> result = new ConcurrentBag<Type>();
+            List<Thread> threads = new List<Thread>();
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                // assembly must be referencing type
+                if (!assembly.CanAccessAssembly(attributeAssemblyName))
+                    continue;
+
+                var t = new Thread(() =>
+                {
+                    foreach (var type in assembly.GetTypes())
+                    {
+                        Attribute attribute = type.GetCustomAttribute(attributeType);
+                        if (attribute != null)
+                        {
+                            result.Add(type);
+                        }
+                    }
+                });
+
+                threads.Add(t);
+
+                t.Start();
+            }
+
+            foreach (var thread in threads)
+            {
+                thread.Join();
+            }
+
+            return result;
+        }
+
+        public static IEnumerable<Type> GetTypesWithAttribute(Type attributeType)
+        {
+#if !UNITY_EDITOR
+            return UnityEditor.TypeCache.GetTypesWithAttribute(attributeType);
+#else
+            return Internal_GetTypesWithAttribute(attributeType);
+#endif
+        }
 
         public static string GetPrettyFullName(this Type type)
         {
@@ -274,7 +319,7 @@ namespace UnityEngineX
 
         public static Type FindType(string qualifiedTypeName, bool throwOnError)
         {
-            Type t = Type.GetType(qualifiedTypeName, throwOnError);
+            Type t = Type.GetType(qualifiedTypeName, false);
 
             if (t != null)
             {
@@ -284,10 +329,16 @@ namespace UnityEngineX
             {
                 foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
                 {
-                    t = asm.GetType(qualifiedTypeName, throwOnError);
+                    t = asm.GetType(qualifiedTypeName, false);
                     if (t != null)
                         return t;
                 }
+
+                if (throwOnError)
+                {
+                    throw new TypeLoadException($"Could not load type '{qualifiedTypeName}' from assemblies in Domain.");
+                }
+
                 return null;
             }
         }
