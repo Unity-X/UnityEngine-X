@@ -38,7 +38,7 @@ namespace UnityEditorX
 
 
         #region Asset management
-        private const string ASSET_PATH = "Assets/ScriptableObjects/Editor/ScriptDefineSymbolManagerSettings.asset";
+        private const string ASSET_PATH = "Assets/Config/ScriptDefineSymbolManagerSettings.asset";
 
         internal static ScriptDefineSymbolManagerSettings GetOrCreateSettings()
         {
