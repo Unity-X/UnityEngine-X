@@ -156,7 +156,7 @@ namespace UnityEngineX
 
         public static IEnumerable<Type> GetTypesWithAttribute(Type attributeType)
         {
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
             return UnityEditor.TypeCache.GetTypesWithAttribute(attributeType);
 #else
             return Internal_GetTypesWithAttribute(attributeType);
