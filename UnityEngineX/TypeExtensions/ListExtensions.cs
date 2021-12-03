@@ -96,6 +96,19 @@ namespace UnityEngineX
             list[index] = temp;
         }
 
+        public static void Swap<T>(this List<T> list, int indexA, int indexB)
+        {
+            if (indexA < 0 || indexA >= list.Count)
+                throw new ArgumentOutOfRangeException(nameof(indexA));
+
+            if (indexB < 0 || indexB >= list.Count)
+                throw new ArgumentOutOfRangeException(nameof(indexB));
+
+            T temp = list[indexA];
+            list[indexA] = list[indexB];
+            list[indexB] = temp;
+        }
+
         public static void MoveFirst<T>(this List<T> list, int index)
         {
             if (list.Count <= 1)
