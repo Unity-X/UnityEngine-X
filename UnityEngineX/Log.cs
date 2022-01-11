@@ -151,6 +151,42 @@ namespace UnityEngineX
 #else
              = false;
 #endif
+        public static readonly bool EnabledInfo
+#if UNITY_X_LOG_INFO
+             = true;
+#else
+             = false;
+#endif
+        public static readonly bool EnabledAssert
+#if UNITY_X_LOG_ASSERT
+             = true;
+#else
+             = false;
+#endif
+        public static readonly bool EnabledError
+#if UNITY_X_LOG_ERROR
+             = true;
+#else
+             = false;
+#endif
+        public static readonly bool EnabledException
+#if UNITY_X_LOG_EXCEPTION
+             = true;
+#else
+             = false;
+#endif
+        public static readonly bool EnabledWarning
+#if UNITY_X_LOG_WARNING
+             = true;
+#else
+             = false;
+#endif
+        public static readonly bool EnabledMethod
+#if UNITY_X_LOG_METHOD
+             = true;
+#else
+             = false;
+#endif
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod] // initializes in editor
