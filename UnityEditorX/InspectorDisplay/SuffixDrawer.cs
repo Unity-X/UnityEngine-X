@@ -9,16 +9,13 @@ namespace UnityEditorX.InspectorDisplay
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            EditorGUI.PropertyField(position, property, label, true);
+
             Suffix suffix = attribute as Suffix;
-
-            var suffixWidth = EditorStyles.label.CalcSize(new GUIContent(suffix.text)).x;
-
-            position.xMax -= suffixWidth;
-            EditorGUI.PropertyField(position, property, true);
-
-            position.x += position.width;
+            var suffixWidth = EditorStyles.miniLabel.CalcSize(new GUIContent(suffix.Text)).x;
+            position.x += position.width - suffixWidth - 4;
             position.width = suffixWidth;
-            EditorGUI.LabelField(position, suffix.text);
+            EditorGUI.LabelField(position, suffix.Text, EditorStyles.miniLabel);
         }
     }
 }

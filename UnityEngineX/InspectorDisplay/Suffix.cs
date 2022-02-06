@@ -4,10 +4,11 @@ namespace UnityEngineX.InspectorDisplay
 {
     public class Suffix : PropertyAttribute
     {
-        public string text;
+        public string Text;
+
         public Suffix(string text)
         {
-            this.text = text;
+            Text = text;
         }
     }
 }
