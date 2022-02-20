@@ -7,6 +7,7 @@ namespace UnityEngineX
     public static class CommandLine
     {
         static List<string> s_arguments;
+        static List<string> s_argumentGrouped;
 
         public static ReadOnlyList<string> Arguments
         {
@@ -15,6 +16,19 @@ namespace UnityEngineX
                 if (s_arguments == null)
                     s_arguments = new List<string>(Environment.GetCommandLineArgs());
                 return s_arguments.AsReadOnlyNoAlloc();
+            }
+        }
+
+        /// <summary>
+        /// Similar to <see cref="Arguments"/>, but this will keep characters that are bound by quotes "" together in 1 argument.
+        /// </summary>
+        public static ReadOnlyList<string> GroupedArguments
+        {
+            get
+            {
+                if (s_argumentGrouped == null)
+                    s_argumentGrouped = new List<string>(SplitCommandLineInGroups(string.Join(" ", Environment.GetCommandLineArgs())));
+                return s_argumentGrouped.AsReadOnlyNoAlloc();
             }
         }
 
@@ -61,8 +75,10 @@ namespace UnityEngineX
             return false;
         }
 
-
-        public static IEnumerable<string> SplitCommandLine(string commandLine)
+        /// <summary>
+        /// This will split the comment line into arguments by looking for spaces (spaces inside quotes "" are ignored).
+        /// </summary>
+        public static IEnumerable<string> SplitCommandLineInGroups(string commandLine)
         {
             bool inQuotes = false;
 
