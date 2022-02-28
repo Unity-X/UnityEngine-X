@@ -17,6 +17,12 @@ using UnityEngineX;
 
 namespace UnityEngineX
 {
+    public enum LogChannelPersistence
+    {
+        RemovedOnDomainReload,
+        PersistAcrossDomainReload
+    }
+
     public class LogChannel
     {
         internal LogChannel() { }
@@ -24,6 +30,7 @@ namespace UnityEngineX
         public string Name { get; internal set; }
         public int Id { get; internal set; }
         public bool Active { get; internal set; }
+        public LogChannelPersistence Persistence { get; set; }
 
         internal bool ActiveByDefault { get; set; }
     }
@@ -52,6 +59,14 @@ namespace UnityEngineX
             private static ReaderWriterLockSlim s_channelsLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
             private static List<LogChannel> s_channels = new List<LogChannel>();
 
+            [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+            static void Init()
+            {
+                s_channelsLock.EnterWriteLock();
+                s_channels.RemoveAll((c) => c.Persistence == LogChannelPersistence.RemovedOnDomainReload);
+                s_channelsLock.ExitWriteLock();
+            }
+
             public static LogChannel[] GetChannels()
             {
                 s_channelsLock.EnterReadLock();
@@ -60,7 +75,7 @@ namespace UnityEngineX
                 return result;
             }
 
-            internal static LogChannel CreateChannel(string name, bool activeByDefault = true)
+            internal static LogChannel CreateChannel(string name, bool activeByDefault = true, LogChannelPersistence persistence = LogChannelPersistence.PersistAcrossDomainReload)
             {
                 s_channelsLock.EnterWriteLock();
 
@@ -78,7 +93,8 @@ namespace UnityEngineX
                         Name = name,
                         Id = s_channels.Count,
                         ActiveByDefault = activeByDefault,
-                        Active = IsActiveInSettings(name, activeByDefault)
+                        Active = IsActiveInSettings(name, activeByDefault),
+                        Persistence = persistence
                     };
 
                     s_channels.Add(newChannel);
