@@ -36,7 +36,7 @@ namespace UnityEditorX.InspectorDisplay
                     _cachedLabel.text = property.displayName;
 
                 position.height = EditorGUI.GetPropertyHeight(property, _cachedLabel, child.hasVisibleChildren);
-                EditorGUI.PropertyField(position, property, _cachedLabel, child.isExpanded);
+                EditorGUI.PropertyField(position, property, _cachedLabel, true);
                 position.y += position.height + 2 /*padding*/;
             }
         }
