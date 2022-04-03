@@ -26,6 +26,30 @@ namespace UnityEngineX
             return GetMembersWithAttribute(attributeType, t => t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static));
         }
 
+        public static IEnumerable<FieldInfo> GetStaticFieldsOfType(Type fieldType)
+        {
+            bool isGeneric = fieldType.IsGenericTypeDefinition;
+
+            return GetMembers(fieldType,
+                t => t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static),
+                filter: (field) =>
+                {
+                    if (isGeneric)
+                    {
+                        if (field.FieldType.IsGenericType)
+                        {
+                            var genType = field.FieldType.GetGenericTypeDefinition();
+                            return genType.IsAssignableFrom(fieldType);
+                        }
+                        return false;
+                    }
+                    else
+                    {
+                        return fieldType.IsAssignableFrom(field.FieldType);
+                    }
+                });
+        }
+
         public static IEnumerable<MethodInfo> GetStaticMethodsWithAttribute(Type attributeType)
         {
 #if UNITY_EDITOR
@@ -80,16 +104,16 @@ namespace UnityEngineX
             return false;
         }
 
-        private static IEnumerable<T> GetMembersWithAttribute<T>(Type attributeType, Func<Type, T[]> getMembersOfType) where T : MemberInfo
+        private static IEnumerable<T> GetMembers<T>(Type whoHaveAccessToThisType, Func<Type, T[]> getMembersOfType, Func<T, bool> filter) where T : MemberInfo
         {
-            string attributeAssemblyName = attributeType.Assembly.GetName().Name;
+            string typeRestriction = whoHaveAccessToThisType.Assembly.GetName().Name;
 
             ConcurrentBag<T> result = new ConcurrentBag<T>();
             List<Thread> threads = new List<Thread>();
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 // assembly must be referencing type
-                if (!assembly.CanAccessAssembly(attributeAssemblyName))
+                if (!assembly.CanAccessAssembly(typeRestriction))
                     continue;
 
                 var t = new Thread(() =>
@@ -98,7 +122,7 @@ namespace UnityEngineX
                     {
                         foreach (var member in getMembersOfType(type))
                         {
-                            if (Attribute.IsDefined(member, attributeType))
+                            if (filter(member))
                                 result.Add(member);
                         }
                     }
@@ -115,6 +139,16 @@ namespace UnityEngineX
             }
 
             return result;
+        }
+
+        private static IEnumerable<T> GetMembersWithAttribute<T>(Type attributeType, Func<Type, T[]> getMembersOfType) where T : MemberInfo
+        {
+            return GetMembers(whoHaveAccessToThisType: attributeType,
+                getMembersOfType,
+                filter: (T member) =>
+                {
+                    return Attribute.IsDefined(member, attributeType);
+                });
         }
 
         private static IEnumerable<Type> Internal_GetTypesWithAttribute(Type attributeType)
