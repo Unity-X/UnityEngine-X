@@ -284,8 +284,8 @@ namespace UnityEditorX
                             position.y = position.y - selected * 16 - 19;
                         }
 
-                        PopupCallbackInfo.instance = new PopupCallbackInfo(controlID);
-                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.instance.SetEnumValueDelegate, null);
+                        PopupCallbackInfo.s_instance = new PopupCallbackInfo(controlID);
+                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.s_instance.SetEnumValueDelegate, null);
                         GUIUtility.keyboardControl = controlID;
                         evt.Use();
                     }
@@ -298,8 +298,8 @@ namespace UnityEditorX
                             position.y = position.y - selected * 16 - 19;
                         }
 
-                        PopupCallbackInfo.instance = new PopupCallbackInfo(controlID);
-                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.instance.SetEnumValueDelegate, null);
+                        PopupCallbackInfo.s_instance = new PopupCallbackInfo(controlID);
+                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.s_instance.SetEnumValueDelegate, null);
                         evt.Use();
                     }
                     break;

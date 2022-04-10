@@ -22,7 +22,7 @@ namespace UnityEditorX
         internal sealed class PopupCallbackInfo
         {
             // The global shared popup state
-            public static PopupCallbackInfo instance = null;
+            public static PopupCallbackInfo s_instance = null;
 
             // Name of the command event sent from the popup menu to OnGUI when user has changed selection
             internal const string kPopupMenuChangedMessage = "PopupMenuChanged";
@@ -47,18 +47,16 @@ namespace UnityEditorX
             // *undoc*
             public static int GetSelectedValueForControl(int controlID, int selected)
             {
+                if (s_instance == null)
+                    return selected;
+
                 Event evt = Event.current;
                 if (evt.type == EventType.ExecuteCommand && evt.commandName == kPopupMenuChangedMessage)
                 {
-                    if (instance == null)
+                    if (s_instance.m_ControlID == controlID)
                     {
-                        Debug.LogError("Popup menu has no instance");
-                        return selected;
-                    }
-                    if (instance.m_ControlID == controlID)
-                    {
-                        selected = instance.m_SelectedIndex;
-                        instance = null;
+                        selected = s_instance.m_SelectedIndex;
+                        s_instance = null;
                         GUI.changed = true;
                         evt.Use();
                     }
