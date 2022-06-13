@@ -145,5 +145,15 @@ namespace UnityEngineX
                 list[i] = temp;
             }
         }
+
+        public static float Sum(this float[] list)
+        {
+            float sum = 0;
+            for (int i = 0; i < list.Length; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
     }
 }
