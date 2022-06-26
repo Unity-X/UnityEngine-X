@@ -199,7 +199,7 @@ namespace UnityEngineX
 
         public static string GetPrettyFullName(this Type type)
         {
-            StringBuilder stringBuilder = StringBuilderPool.Take();
+            StringBuilder stringBuilder = new StringBuilder();
 
             if (type.IsArray)
             {
@@ -275,8 +275,6 @@ namespace UnityEngineX
 
             string result = stringBuilder.ToString();
 
-            StringBuilderPool.Release(stringBuilder);
-
             return result;
         }
 
@@ -306,7 +304,7 @@ namespace UnityEngineX
             }
             else if (type.IsGenericType)
             {
-                StringBuilder stringBuilder = StringBuilderPool.Take();
+                StringBuilder stringBuilder = new StringBuilder();
 
                 string typeName = type.Name;
                 int indexOfGenericArguments = typeName.IndexOf('`');
@@ -328,8 +326,6 @@ namespace UnityEngineX
                 stringBuilder.Append(">");
 
                 string result = stringBuilder.ToString();
-
-                StringBuilderPool.Release(stringBuilder);
 
                 return result;
             }
