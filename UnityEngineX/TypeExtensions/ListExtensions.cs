@@ -18,7 +18,26 @@ namespace UnityEngineX
             }
             return -1;
         }
-        
+
+        public static int Resize<T>(this List<T> list, int count) where T : new()
+        {
+            int diff = count - list.Count;
+
+            if (diff > 0)
+            {
+                while (list.Count < count)
+                {
+                    list.Add(new T());
+                }
+            }
+            else
+            {
+                if (list.Count > count)
+                    list.RemoveRange(count, -diff);
+            }
+            return diff;
+        }
+
         public static void RemoveFirst<T>(this List<T> list)
         {
             list.RemoveAt(0);
