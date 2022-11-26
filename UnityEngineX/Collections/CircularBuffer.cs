@@ -290,6 +290,83 @@ namespace UnityEngineX
             return new[] { ArrayOne(), ArrayTwo() };
         }
 
+        /// <summary>
+        /// Searches a section of the buffer for a given element using a binary search
+        /// algorithm. Elements of the buffer are compared to the search value using
+        /// the given IComparer interface. If comparer is null, elements of
+        /// the buffer are compared to the search value using the IComparable
+        /// interface, which in that case must be implemented by all elements of the
+        /// list and the given search value. This method assumes that the given
+        /// section of the buffer is already sorted; if this is not the case, the
+        /// result will be incorrect.
+        ///
+        /// The method returns the index of the given value in the buffer. If the
+        /// buffer does not contain the given value, the method returns a negative
+        /// integer. The bitwise complement operator (~) can be applied to a
+        /// negative result to produce the index of the first element (if any) that
+        /// is larger than the given search value.
+        /// 
+        /// The method uses the Array.BinarySearch method to perform the
+        /// search.
+        /// </summary>
+        public int BinarySearch(int index, int count, T item, IComparer<T> comparer)
+        {
+            if (index < 0)
+                throw new ArgumentOutOfRangeException($"Argument 'index' ({index}) should be positive.");
+            if (count < 0)
+                throw new ArgumentOutOfRangeException($"Argument 'count' ({count}) should be positive.");
+            if (_count - index < count)
+                throw new ArgumentOutOfRangeException($"Argument 'index' ({index}) + 'count' ({count}) should not exceed the element count ({_count}) in the buffer.");
+
+            int internalIndex = InternalIndex(index);
+
+            int result;
+            // Could the search require 2 passes ?
+            if (internalIndex + count > Capacity)
+            {
+                int count1 = Capacity - internalIndex;
+                result = Array.BinarySearch<T>(_buffer, internalIndex, count1, item, comparer);
+
+                if (result < 0 && (~result) == Capacity)
+                {
+                    int count2 = count - count1;
+                    result = Array.BinarySearch<T>(_buffer, 0, count2, item, comparer);
+
+                    // looped back completely? Return 'Capacity' right away, otherwise we'll confuse the end for the start and return -1 to the user
+                    if (result < 0 && (~result) == _start)
+                    {
+                        return ~Capacity;
+                    }
+                }
+            }
+            else
+            {
+                result = Array.BinarySearch<T>(_buffer, internalIndex, count, item, comparer);
+            }
+
+            bool notFound = result < 0;
+
+            if (notFound)
+                result = ~result;
+
+            result = ExternalIndex(result);
+
+            if (notFound)
+                result = ~result;
+
+            return result;
+        }
+
+        public int BinarySearch(T item)
+        {
+            return BinarySearch(0, Count, item, null);
+        }
+
+        public int BinarySearch(T item, IComparer<T> comparer)
+        {
+            return BinarySearch(0, Count, item, comparer);
+        }
+
         #region IEnumerable<T> implementation
         public Enumerator GetEnumerator()
         {
@@ -425,6 +502,13 @@ namespace UnityEngineX
         private int InternalIndex(int index)
         {
             return _start + (index < (Capacity - _start) ? index : index - Capacity);
+        }
+
+        private int ExternalIndex(int internalIndex)
+        {
+            return internalIndex >= _start
+                ? internalIndex - _start
+                : internalIndex + (Capacity - _start);
         }
 
         // doing ArrayOne and ArrayTwo methods returning ArraySegment<T> as seen here: 

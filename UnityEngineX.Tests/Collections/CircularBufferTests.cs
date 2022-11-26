@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace UnityEngineX.Tests
@@ -379,6 +380,80 @@ namespace UnityEngineX.Tests
                 index++;
             }
             Assert.That(index, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void CircularBuffer_BinarySearch_Full_Normal()
+        {
+            var buffer = new CircularBuffer<float>(5, new float[] { 0, 1, 2, 3, 4 });
+            Assert.That(buffer.BinarySearch(0), Is.EqualTo(0));
+            Assert.That(buffer.BinarySearch(1), Is.EqualTo(1));
+            Assert.That(buffer.BinarySearch(2), Is.EqualTo(2));
+            Assert.That(buffer.BinarySearch(3), Is.EqualTo(3));
+            Assert.That(buffer.BinarySearch(4), Is.EqualTo(4));
+
+            Assert.That(buffer.BinarySearch(3.5f), Is.EqualTo(~4));
+            Assert.That(buffer.BinarySearch(6), Is.EqualTo(~5));
+            Assert.That(new List<float>() { 0, 1, 2, 3, 4 }.BinarySearch(-1), Is.EqualTo(~0));
+            Assert.That(buffer.BinarySearch(-1), Is.EqualTo(~0));
+        }
+
+        [Test]
+        public void CircularBuffer_BinarySearch_Full_Circular()
+        {
+            var buffer = new CircularBuffer<float>(5, new float[] { 0, 1, 2, 3, 4 });
+            buffer.PushBack(5);
+            buffer.PushBack(6);
+            Assert.That(buffer.BinarySearch(2), Is.EqualTo(0));
+            Assert.That(buffer.BinarySearch(3), Is.EqualTo(1));
+            Assert.That(buffer.BinarySearch(4), Is.EqualTo(2));
+            Assert.That(buffer.BinarySearch(5), Is.EqualTo(3));
+            Assert.That(buffer.BinarySearch(6), Is.EqualTo(4));
+
+            Assert.That(buffer.BinarySearch(9), Is.EqualTo(~5));
+            Assert.That(buffer.BinarySearch(3.5f), Is.EqualTo(~2));
+            Assert.That(buffer.BinarySearch(4.5f), Is.EqualTo(~3));
+            Assert.That(buffer.BinarySearch(-1), Is.EqualTo(~0));
+        }
+
+        [Test]
+        public void CircularBuffer_BinarySearch_Partial_Circular()
+        {
+            var buffer = new CircularBuffer<float>(10, new float[] { 5, 6 });
+            buffer.PushFront(4);
+            buffer.PushFront(3);
+            buffer.PushFront(2);
+
+            Assert.That(buffer.BinarySearch(2), Is.EqualTo(0));
+            Assert.That(buffer.BinarySearch(3), Is.EqualTo(1));
+            Assert.That(buffer.BinarySearch(4), Is.EqualTo(2));
+            Assert.That(buffer.BinarySearch(5), Is.EqualTo(3));
+            Assert.That(buffer.BinarySearch(6), Is.EqualTo(4));
+
+            Assert.That(buffer.BinarySearch(9), Is.EqualTo(~5));
+            Assert.That(buffer.BinarySearch(3.5f), Is.EqualTo(~2));
+            Assert.That(buffer.BinarySearch(4.5f), Is.EqualTo(~3));
+            Assert.That(buffer.BinarySearch(-1), Is.EqualTo(~0));
+        }
+
+        [Test]
+        public void CircularBuffer_BinarySearch_Partial_Normal()
+        {
+            var buffer = new CircularBuffer<float>(10, new float[] { 0, 0, 1 });
+            buffer.PushBack(2);
+            buffer.PushBack(3);
+            buffer.PushBack(4);
+            buffer.PopFront();
+            Assert.That(buffer.BinarySearch(0), Is.EqualTo(0));
+            Assert.That(buffer.BinarySearch(1), Is.EqualTo(1));
+            Assert.That(buffer.BinarySearch(2), Is.EqualTo(2));
+            Assert.That(buffer.BinarySearch(3), Is.EqualTo(3));
+            Assert.That(buffer.BinarySearch(4), Is.EqualTo(4));
+
+            Assert.That(buffer.BinarySearch(3.5f), Is.EqualTo(~4));
+            Assert.That(buffer.BinarySearch(6), Is.EqualTo(~5));
+            Assert.That(new List<float>() { 0, 1, 2, 3, 4 }.BinarySearch(-1), Is.EqualTo(~0));
+            Assert.That(buffer.BinarySearch(-1), Is.EqualTo(~0));
         }
     }
 }
