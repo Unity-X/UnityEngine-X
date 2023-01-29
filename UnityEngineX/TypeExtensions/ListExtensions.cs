@@ -66,37 +66,6 @@ namespace UnityEngineX
             }
         }
 
-        public static bool RemoveWithLastSwap<T>(this List<T> list, T value)
-        {
-            int index = list.IndexOf(value);
-            if (index >= 0)
-            {
-                list.RemoveWithLastSwapAt(index);
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public static void RemoveWithLastSwapAt<T>(this List<T> list, int index)
-        {
-            int lastIndex = list.Count - 1;
-
-            if (index < 0 || index > lastIndex)
-            {
-                throw new IndexOutOfRangeException();
-            }
-
-            if (index != lastIndex)
-            {
-                list[index] = list[lastIndex];
-            }
-
-            list.RemoveAt(lastIndex);
-        }
-
         public static void RemoveFrom<T>(this List<T> list, int index)
         {
             list.RemoveRange(index, list.Count - index);
@@ -278,6 +247,10 @@ namespace UnityEngineX
             {
                 list.Add(value);
             }
+        }
+        public static bool IsValidIndex<T>(this List<T> list, int index)
+        {
+            return index >= 0 && index < list.Count;
         }
     }
 

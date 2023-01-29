@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngineX;
 
 namespace UnityEditorX
@@ -90,8 +91,8 @@ namespace UnityEditorX
 
                 if (s_profileFoldStates[profile])
                 {
-                    List<string> symbolsToAdd = ListPool<string>.Take();
-                    List<string> symbolsToRemove = ListPool<string>.Take();
+                    using var _0 = ListPool<string>.Get(out List<string> symbolsToAdd);
+                    using var _1 = ListPool<string>.Get(out List<string> symbolsToRemove);
 
                     // gui each symbol
                     foreach (ScriptDefineSymbolManager.ISymbol symbol in ScriptDefineSymbolManager.GetSymbols())
@@ -119,10 +120,6 @@ namespace UnityEditorX
                         ScriptDefineSymbolManager.RemoveSymbolFromProfile(item, profile);
                     }
 
-                    // release lists
-                    ListPool<string>.Release(symbolsToRemove);
-                    ListPool<string>.Release(symbolsToAdd);
-
                     EditorGUILayout.Space();
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
@@ -145,7 +142,7 @@ namespace UnityEditorX
             EditorGUILayout.LabelField("Symbols", EditorStyles.boldLabel);
 
             {
-                List<string> symbolsToRemove = ListPool<string>.Take();
+                using var _ = ListPool<string>.Get(out List<string> symbolsToRemove);
                 foreach (var symbol in ScriptDefineSymbolManager.GetSymbols())
                 {
                     if (!s_symbolFoldStates.ContainsKey(symbol))
@@ -207,8 +204,6 @@ namespace UnityEditorX
                 {
                     ScriptDefineSymbolManager.DeleteSymbol(symbol);
                 }
-
-                ListPool<string>.Release(symbolsToRemove);
             }
 
             if (GUILayout.Button("New Symbol"))

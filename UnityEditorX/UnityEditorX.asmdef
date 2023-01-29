@@ -1,6 +1,8 @@
 {
     "name": "UnityEditorX",
+    "rootNamespace": "",
     "references": [
+        "Unity.Collections",
         "UnityEngineX"
     ],
     "includePlatforms": [

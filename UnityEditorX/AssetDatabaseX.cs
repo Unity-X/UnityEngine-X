@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngineX;
+using Unity.Collections;
 
 namespace UnityEditorX
 {
@@ -76,7 +77,7 @@ namespace UnityEditorX
             {
                 if (prefabAssets[i].GetComponent<T>() == null)
                 {
-                    prefabAssets.RemoveWithLastSwapAt(i);
+                    prefabAssets.RemoveAtSwapBack(i);
                     i--;
                 }
             }
@@ -92,7 +93,7 @@ namespace UnityEditorX
             {
                 if (result[i].Value.GetComponent<T>() == null)
                 {
-                    result.RemoveWithLastSwapAt(i);
+                    result.RemoveAtSwapBack(i);
                     i--;
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEngine.Pool;
 using UnityEngineX;
 
 namespace UnityEditorX
@@ -189,7 +190,7 @@ namespace UnityEditorX
         /// </summary>
         public static Type[] ParseTypesFromCode(string codeText)
         {
-            List<Type> foundTypes = ListPool<Type>.Take();
+            using var _ = ListPool<Type>.Get(out List<Type> foundTypes);
 
             TermIterator termIterator = new TermIterator(codeText, considerSpecialCharactersTerms: true);
 
@@ -340,8 +341,6 @@ namespace UnityEditorX
             }
 
             Type[] result = foundTypes.ToArray();
-
-            ListPool<Type>.Release(foundTypes);
 
             return result;
         }

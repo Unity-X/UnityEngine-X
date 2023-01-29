@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Pool;
 using UnityEngine.SceneManagement;
 
 namespace UnityEngineX
@@ -12,7 +13,7 @@ namespace UnityEngineX
         /// </summary>
         static public T FindComponentOnRoots<T>(this in Scene scene)
         {
-            List<GameObject> rootObjs = ListPool<GameObject>.Take();
+            using var _ = ListPool<GameObject>.Get(out List<GameObject> rootObjs);
             scene.GetRootGameObjects(rootObjs);
 
             T result = default;
@@ -24,8 +25,6 @@ namespace UnityEngineX
                     break;
                 }
             }
-
-            ListPool<GameObject>.Release(rootObjs);
 
             return result;
         }
