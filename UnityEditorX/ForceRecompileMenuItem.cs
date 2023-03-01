@@ -9,7 +9,7 @@ namespace UnityEditorX
         [MenuItem("Tools/Force Recompile")]
         private static void ForceRecompile()
         {
-            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation();
+            UnityEditor.Compilation.CompilationPipeline.RequestScriptCompilation(UnityEditor.Compilation.RequestScriptCompilationOptions.CleanBuildCache);
         }
 
         [MenuItem("Tools/Force Recompile", validate = true)]
