@@ -11,14 +11,14 @@ namespace UnityEngineX
 
             var result = new T[count];
 
-            if(count > 0)
+            if (count > 0)
             {
                 Array.Copy(array, index, result, 0, count);
             }
 
             return result;
         }
-        
+
         public static T[] Concat<T>(T[] a, T[] b)
         {
             if (a is null)
@@ -32,6 +32,16 @@ namespace UnityEngineX
             b.CopyTo(result, a.Length);
 
             return result;
+        }
+
+        public static void Resize<T>(ref T[] array, int newLength)
+        {
+            if (array.Length == newLength)
+                return;
+
+            var newArray = new T[newLength];
+            Array.Copy(array, newArray, Math.Min(newArray.Length, array.Length));
+            array = newArray;
         }
     }
 }
