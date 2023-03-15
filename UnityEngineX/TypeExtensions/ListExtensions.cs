@@ -252,6 +252,16 @@ namespace UnityEngineX
         {
             return index >= 0 && index < list.Count;
         }
+
+        public static float Sum(this List<float> list)
+        {
+            float sum = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
     }
 
 }
