@@ -153,6 +153,17 @@ namespace UnityEngineX
             return amount;
         }
 
+        public static int CountOf<T>(this List<T> list, Predicate<T> predicate)
+        {
+            int amount = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (predicate(list[i]))
+                    amount++;
+            }
+            return amount;
+        }
+
         public static T PickRandom<T>(this List<T> list)
         {
             if (list.Count == 0)
