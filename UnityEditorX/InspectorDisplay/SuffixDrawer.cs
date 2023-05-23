@@ -15,7 +15,11 @@ namespace UnityEditorX.InspectorDisplay
             var suffixWidth = EditorStyles.miniLabel.CalcSize(new GUIContent(suffix.Text)).x;
             position.x += position.width - suffixWidth - 4;
             position.width = suffixWidth;
+            
+            var prevIndent = EditorGUI.indentLevel;
+            EditorGUI.indentLevel = 0;
             EditorGUI.LabelField(position, suffix.Text, EditorStyles.miniLabel);
+            EditorGUI.indentLevel = prevIndent;
         }
     }
 }
