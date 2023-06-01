@@ -19,7 +19,7 @@ namespace UnityEngineX
             return -1;
         }
 
-        public static int Resize<T>(this List<T> list, int count) where T : new()
+        public static int Resize<T>(this List<T> list, int count, Action<T> onCreate = null, Action<T> onRemove = null) where T : new()
         {
             int diff = count - list.Count;
 
@@ -27,13 +27,20 @@ namespace UnityEngineX
             {
                 while (list.Count < count)
                 {
-                    list.Add(new T());
+                    var newT = new T();
+                    onCreate?.Invoke(newT);
+                    list.Add(newT);
                 }
             }
             else
             {
-                if (list.Count > count)
-                    list.RemoveRange(count, -diff);
+                while (list.Count > count)
+                {
+                    int idx = list.Count - 1;
+                    var oldT = list[idx];
+                    onRemove?.Invoke(oldT);
+                    list.RemoveAt(idx);
+                }
             }
             return diff;
         }
