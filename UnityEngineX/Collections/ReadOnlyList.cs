@@ -16,6 +16,7 @@ namespace UnityEngineX
             _list = list ?? throw new System.NullReferenceException();
         }
 
+        public bool IsCreated => _list != null;
         public T this[int index] => _list[index];
         public int Count => _list.Count;
         public bool Contains(T value) => _list.Contains(value);
@@ -75,6 +76,7 @@ namespace UnityEngineX
             _list = list ?? throw new System.NullReferenceException();
         }
 
+        public bool IsCreated => _list != null;
         public T this[int index] => (T)_list[index];
         public int Count => _list.Count;
         public bool Contains(T value) => _list.Contains(value);
