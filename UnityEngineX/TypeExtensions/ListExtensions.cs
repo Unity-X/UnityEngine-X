@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace UnityEngineX
 {
@@ -279,6 +280,56 @@ namespace UnityEngineX
                 sum += list[i];
             }
             return sum;
+        }
+
+        public static int Sum(this List<int> list)
+        {
+            int sum = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
+
+        public static Vector2 Sum(this List<Vector2> list)
+        {
+            Vector2 sum = Vector2.zero;
+            for (int i = 0; i < list.Count; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
+
+        public static Vector3 Sum(this List<Vector3> list)
+        {
+            Vector3 sum = Vector3.zero;
+            for (int i = 0; i < list.Count; i++)
+            {
+                sum += list[i];
+            }
+            return sum;
+        }
+
+        public static float Average(this List<float> list)
+        {
+            return list.Sum() / list.Count;
+        }
+
+        public static float Average(this List<int> list)
+        {
+            return (float)list.Sum() / list.Count;
+        }
+
+        public static Vector2 Average(this List<Vector2> list)
+        {
+            return list.Sum() / list.Count;
+        }
+
+        public static Vector3 Average(this List<Vector3> list)
+        {
+            return list.Sum() / list.Count;
         }
     }
 
