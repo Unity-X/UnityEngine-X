@@ -74,6 +74,20 @@ namespace UnityEngineX
             }
         }
 
+        public static int RemoveAll<T>(this List<T> list, List<T> elementsToRemove)
+        {
+            int removed = 0;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                if (elementsToRemove.Contains(list[i]))
+                {
+                    list.RemoveAt(i);
+                    removed++;
+                }
+            }
+            return removed;
+        }
+
         public static void RemoveFrom<T>(this List<T> list, int index)
         {
             list.RemoveRange(index, list.Count - index);
