@@ -21,7 +21,7 @@ namespace UnityEditorX.InspectorDisplay
 
                 totalHeight += EditorGUI.GetPropertyHeight(property, _cachedLabel, child.hasVisibleChildren) + 2 /*padding*/;
             }
-            return totalHeight - 2;  // we have to subtract 2px of extra padding that unity added because of the last child
+            return totalHeight - 2;  // we have to subtract 2px of extra padding because the last child doesn't need it
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
