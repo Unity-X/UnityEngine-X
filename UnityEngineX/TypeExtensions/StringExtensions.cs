@@ -58,21 +58,6 @@
         /// <summary>
         /// Remove the first met instance of the given substring
         /// </summary>
-        public static string ReplaceFirst(this string text, string subString)
-        {
-            int index = text.IndexOf(subString);
-
-            if (index != -1)
-            {
-                return text.Remove(index, subString.Length);
-            }
-
-            return text;
-        }
-
-        /// <summary>
-        /// Remove the first met instance of the given substring
-        /// </summary>
         public static string RemoveFirst(this string text, string subString)
         {
             int index = text.IndexOf(subString);
