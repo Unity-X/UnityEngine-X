@@ -158,15 +158,9 @@ namespace UnityEditorX
             }
         }
 
-        public static string GetFileNameFromPath(string path)
+        public static string GetFullFilePath(string projectileRelativePath)
         {
-            return path.Substring(path.LastIndexOf('/') + 1);
-        }
-
-        public static string GetAssetNameFromPath(string path)
-        {
-            string fileName = GetFileNameFromPath(path);
-            return fileName.Remove(fileName.LastIndexOf('.'));
+            return Application.dataPath.RemoveLast("Assets") + projectileRelativePath;
         }
     }
 }
