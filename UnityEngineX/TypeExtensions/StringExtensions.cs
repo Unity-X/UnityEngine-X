@@ -35,6 +35,11 @@
             return txt.Remove(index, txt.Length - index);
         }
 
+        public static string ReplacePortion(this string text, int index, int count, string replacement)
+        {
+            return text.Remove(index, count).Insert(index, replacement);
+        }
+
         public static string ReplaceFirst(this string text, string search, string replace)
         {
             int pos = text.IndexOf(search);
