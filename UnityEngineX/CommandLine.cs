@@ -9,6 +9,17 @@ namespace UnityEngineX
         static List<string> s_arguments;
         static List<string> s_argumentGrouped;
 
+
+        /// <summary>
+        /// Eg.
+        /// <list type="number">
+        /// <item>-resolution</item>
+        /// <item>1920</item>
+        /// <item>1080</item>
+        /// <item>-map</item>
+        /// <item>Tundra</item>
+        /// </list>
+        /// </summary>
         public static ReadOnlyList<string> Arguments
         {
             get
@@ -16,19 +27,6 @@ namespace UnityEngineX
                 if (s_arguments == null)
                     s_arguments = new List<string>(Environment.GetCommandLineArgs());
                 return s_arguments.AsReadOnlyNoAlloc();
-            }
-        }
-
-        /// <summary>
-        /// Similar to <see cref="Arguments"/>, but this will keep characters that are bound by quotes "" together in 1 argument.
-        /// </summary>
-        public static ReadOnlyList<string> GroupedArguments
-        {
-            get
-            {
-                if (s_argumentGrouped == null)
-                    s_argumentGrouped = new List<string>(SplitCommandLineInGroups(string.Join(" ", Environment.GetCommandLineArgs())));
-                return s_argumentGrouped.AsReadOnlyNoAlloc();
             }
         }
 
