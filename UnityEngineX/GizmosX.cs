@@ -44,7 +44,7 @@ namespace UnityEngineX
 
             GUI.color = restoreTextColor;
             GUI.backgroundColor = restoreBackColor;
-        }
 #endif
+        }
     }
 }
