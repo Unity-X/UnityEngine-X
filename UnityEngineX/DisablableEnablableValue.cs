@@ -80,7 +80,7 @@ namespace UnityEngineX
             _enabledByDefault = enabledByDefault;
         }
 
-        public void AddKey(string key)
+        protected void AddKey(string key)
         {
             PreChange();
 
