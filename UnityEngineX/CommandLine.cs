@@ -74,20 +74,26 @@ namespace UnityEngineX
         }
 
         /// <summary>
-        /// This will split the comment line into arguments by looking for spaces (spaces inside quotes "" are ignored).
+        /// This will split the comment line into arguments by looking for spaces (spaces inside " " or { } are ignored).
         /// </summary>
         public static IEnumerable<string> SplitCommandLineInGroups(string commandLine)
         {
             bool inQuotes = false;
 
+            int inGroupDepth = 0;
+
             return commandLine.Split(c =>
             {
-                if (c == '\"')
+                if (c == '{')
+                    inGroupDepth++;
+                else if (c == '}')
+                    inGroupDepth--;
+                else if (c == '\"')
                     inQuotes = !inQuotes;
 
-                return !inQuotes && c == ' ';
+                return !inQuotes && inGroupDepth == 0 && c == ' ';
             })
-                              .Select(arg => arg.Trim().TrimMatchingQuotes('\"'))
+                              .Select(arg => arg.Trim().RemoveDelimiters('\"', '\"').RemoveDelimiters('{', '}'))
                               .Where(arg => !string.IsNullOrEmpty(arg));
         }
 
@@ -108,10 +114,10 @@ namespace UnityEngineX
             yield return str.Substring(nextPiece);
         }
 
-        private static string TrimMatchingQuotes(this string input, char quote)
+        private static string RemoveDelimiters(this string input, char first, char last)
         {
             if ((input.Length >= 2) &&
-                (input[0] == quote) && (input[input.Length - 1] == quote))
+                (input[0] == first) && (input[input.Length - 1] == last))
                 return input.Substring(1, input.Length - 2);
 
             return input;
