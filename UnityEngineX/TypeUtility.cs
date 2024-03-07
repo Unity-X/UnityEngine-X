@@ -377,5 +377,23 @@ namespace UnityEngineX
         {
             return Attribute.IsDefined(methodInfo, typeof(AsyncStateMachineAttribute));
         }
+
+        public static MemberInfo GetMemberIncludeBaseType(Type type, string memberName, BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+        {
+            while (type != null)
+            {
+                MemberInfo[] memberInfos = type.GetMember(memberName, bindingFlags);
+
+                if (memberInfos.Length > 0)
+                {
+                    return memberInfos[0];
+                }
+                else
+                {
+                    type = type.BaseType;
+                }
+            }
+            return null;
+        }
     }
 }

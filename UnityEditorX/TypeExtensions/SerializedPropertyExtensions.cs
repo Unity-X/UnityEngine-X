@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using System;
 using UnityEditor;
+using System.Collections;
+using System.Reflection;
+using UnityEngine;
 
 public static class SerializedPropertyExtensions
 {
@@ -40,7 +43,7 @@ public static class SerializedPropertyExtensions
     {
         if (!property.isArray)
             throw new ArgumentException("Property is not an array", nameof(property));
-        
+
         if (index < 0)
             throw new ArgumentException("Index is out of range.", nameof(index));
 
@@ -66,5 +69,106 @@ public static class SerializedPropertyExtensions
             if (i != j)
                 property.MoveArrayElement(i + 1, j + 1);
         }
+    }
+
+    public static object GetObjectInstance(this SerializedProperty property)
+    {
+        string parentPath = GetPropertyParentPath(property.propertyPath);
+
+        if (parentPath == "")
+        {
+            // we're already at the root-level
+            return property.serializedObject.targetObject;
+        }
+        else
+        {
+            // we need to dig in deeper in the serialized data
+            return GetObjectInstanceFromPath(property.serializedObject.targetObject, parentPath);
+        }
+    }
+
+    public static object[] GetObjectInstances(this SerializedProperty property)
+    {
+        string parentPath = GetPropertyParentPath(property.propertyPath);
+
+        if (parentPath == "")
+        {
+            // we're already at the root-level
+            return property.serializedObject.targetObjects;
+        }
+        else
+        {
+            object[] targetObjects = property.serializedObject.targetObjects;
+            object[] instances = new object[targetObjects.Length];
+
+            for (int i = 0; i < instances.Length; i++)
+            {
+                // we need to dig in deeper in the serialized data
+                instances[i] = GetObjectInstanceFromPath(targetObjects[i], parentPath);
+            }
+            return instances;
+        }
+    }
+
+    private static string GetPropertyParentPath(string propertyPath)
+    {
+        // the serialized property path will look like this:
+        // theRootObject.aSubProperty.Array.data[16].ourProperty
+        string path = propertyPath;
+        if (path.Contains("."))
+        {
+            path = path.Remove(path.LastIndexOf('.'));
+
+            if (path.EndsWith(".Array")) // if the path end with .Array, we'll want to strip that away and restart
+            {
+                path = path.Remove(path.LastIndexOf('.'));
+                return GetPropertyParentPath(path);
+            }
+        }
+        else
+        {
+            path = "";
+        }
+
+        return path;
+    }
+
+    private static object GetObjectInstanceFromPath(object parentObject, string objectPath)
+    {
+        string[] pathSerializedNames = objectPath.Split('.');
+        try
+        {
+            for (int i = 0; i < pathSerializedNames.Length; i++)
+            {
+                if (pathSerializedNames[i] == "Array")
+                {
+                    // the serialized name will be like this 'Array.data[15].TheThingAfter'
+
+                    ++i; // skip 'Array'
+
+                    // we want to extract the '15' out of 'data[15]'
+                    string dataIndex = pathSerializedNames[i].Substring("data".Length + 1, pathSerializedNames[i].Length - "data".Length - "[]".Length);
+                    int index = int.Parse(dataIndex);
+                    if (parentObject is IList list)
+                    {
+                        if (list.Count <= index)
+                            return null;
+                        parentObject = list[index];
+                    }
+                }
+                else
+                {
+                    FieldInfo fieldInfo = parentObject.GetType().GetField(pathSerializedNames[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    parentObject = fieldInfo.GetValue(parentObject);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            return null;
+        }
+
+        return parentObject;
     }
 }
