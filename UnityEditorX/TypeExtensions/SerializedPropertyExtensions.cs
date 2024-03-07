@@ -73,6 +73,9 @@ public static class SerializedPropertyExtensions
 
     public static object GetObjectInstance(this SerializedProperty property)
     {
+        if (property.serializedObject.targetObject == null)
+            return null;
+
         string parentPath = GetPropertyParentPath(property.propertyPath);
 
         if (parentPath == "")
