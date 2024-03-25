@@ -138,11 +138,16 @@ public static class SerializedPropertyExtensions
 
     private static object GetObjectInstanceFromPath(object parentObject, string objectPath)
     {
+        object currentObject = parentObject;
+
         string[] pathSerializedNames = objectPath.Split('.');
         try
         {
             for (int i = 0; i < pathSerializedNames.Length; i++)
             {
+                if (currentObject == null)
+                    break;
+
                 if (pathSerializedNames[i] == "Array")
                 {
                     // the serialized name will be like this 'Array.data[15].TheThingAfter'
@@ -152,17 +157,17 @@ public static class SerializedPropertyExtensions
                     // we want to extract the '15' out of 'data[15]'
                     string dataIndex = pathSerializedNames[i].Substring("data".Length + 1, pathSerializedNames[i].Length - "data".Length - "[]".Length);
                     int index = int.Parse(dataIndex);
-                    if (parentObject is IList list)
+                    if (currentObject is IList list)
                     {
                         if (list.Count <= index)
                             return null;
-                        parentObject = list[index];
+                        currentObject = list[index];
                     }
                 }
                 else
                 {
-                    FieldInfo fieldInfo = parentObject.GetType().GetField(pathSerializedNames[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                    parentObject = fieldInfo.GetValue(parentObject);
+                    FieldInfo fieldInfo = currentObject.GetType().GetField(pathSerializedNames[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    currentObject = fieldInfo.GetValue(currentObject);
                 }
             }
         }
@@ -172,6 +177,6 @@ public static class SerializedPropertyExtensions
             return null;
         }
 
-        return parentObject;
+        return currentObject;
     }
 }
