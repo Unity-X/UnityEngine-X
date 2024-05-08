@@ -46,5 +46,33 @@ namespace UnityEngineX
             GUI.backgroundColor = restoreBackColor;
 #endif
         }
+
+        public static void DrawHexagon(Vector2 position, float radius, float rotation)
+        {
+            Vector3[] points = new Vector3[6];
+            for (int i = 0; i < 6; i++)
+            {
+                points[i] = position + Rotate(new Vector2(radius, 0), 60 * i + rotation);
+            }
+
+            Gizmos.DrawLineStrip(points, looped: true);
+
+            Vector2 Rotate(Vector2 v, float angle)
+            {
+                return RotateRad(v, angle * Mathf.Deg2Rad);
+            }
+            Vector2 RotateRad(Vector2 v, float radians)
+            {
+                float sin = Mathf.Sin(radians);
+                float cos = Mathf.Cos(radians);
+
+                float tx = v.x;
+                float ty = v.y;
+
+                return new Vector2(
+                    (cos * tx) - (sin * ty),    // x
+                    (sin * tx) + (cos * ty));   // y
+            }
+        }
     }
 }
