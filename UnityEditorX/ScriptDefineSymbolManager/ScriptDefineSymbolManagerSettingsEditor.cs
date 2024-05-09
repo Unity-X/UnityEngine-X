@@ -95,18 +95,46 @@ namespace UnityEditorX
                     using var _1 = ListPool<string>.Get(out List<string> symbolsToRemove);
 
                     // gui each symbol
-                    foreach (ScriptDefineSymbolManager.ISymbol symbol in ScriptDefineSymbolManager.GetSymbols())
-                    {
-                        bool enabled = profile.DefinedSymbols.Contains(symbol.Name);
 
-                        bool newEnabled = GUILayout.Toggle(enabled, symbol.Name);
+                    Dictionary<string, ScriptDefineSymbolManager.ISymbol> allSymbolsIncludingMissing = new();
+                    foreach (var sym in ScriptDefineSymbolManager.GetSymbols())
+                    {
+                        allSymbolsIncludingMissing.Add(sym.Name, sym);
+                    }
+
+                    foreach (var sym in profile.DefinedSymbols)
+                    {
+                        if (!allSymbolsIncludingMissing.ContainsKey(sym))
+                            allSymbolsIncludingMissing.Add(sym, null);
+                    }
+
+                    foreach (var symbol in allSymbolsIncludingMissing)
+                    {
+                        bool enabled = profile.DefinedSymbols.Contains(symbol.Key);
+
+                        bool missing = symbol.Value == null;
+
+                        if (missing)
+                            GUILayout.BeginHorizontal();
+
+                        bool newEnabled = GUILayout.Toggle(enabled, symbol.Key);
+
+                        // missing symbol!
+                        if (missing)
+                        {
+                            var wasColor = GUI.color;
+                            GUI.color = Color.yellow;
+                            GUILayout.Label("MISSING SYMBOL");
+                            GUI.color = wasColor;
+                            GUILayout.EndHorizontal();
+                        }
 
                         if (enabled != newEnabled)
                         {
                             if (newEnabled)
-                                symbolsToAdd.Add(symbol.Name);
+                                symbolsToAdd.Add(symbol.Key);
                             else
-                                symbolsToRemove.Add(symbol.Name);
+                                symbolsToRemove.Add(symbol.Key);
                         }
                     }
 
