@@ -13,7 +13,6 @@ using UnityEngineX;
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_INFO", "Enables info logs with Log.Info(..). If disabled, all calls to these methods are stripped from the build.")]
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_EXCEPTION", "Enables exception logs with Log.Exception(..). If disabled, all calls to these methods are stripped from the build.")]
 [assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_WARNING", "Enables warning logs with Log.Warning(..). If disabled, all calls to these methods are stripped from the build.")]
-[assembly: DeclareScriptDefineSymbol("UNITY_X_LOG_METHOD", "Enables method logs with Log.Method(..). If disabled, all calls to these methods are stripped from the build.")]
 
 namespace UnityEngineX
 {
@@ -162,7 +161,7 @@ namespace UnityEngineX
         private static event Internals.LogCallback LogMessageReceivedThreaded;
 
         public static readonly bool Enabled
-#if UNITY_X_LOG_ASSERT || UNITY_X_LOG_ERROR || UNITY_X_LOG_INFO || UNITY_X_LOG_EXCEPTION || UNITY_X_LOG_WARNING || UNITY_X_LOG_METHOD
+#if UNITY_X_LOG_ASSERT || UNITY_X_LOG_ERROR || UNITY_X_LOG_INFO || UNITY_X_LOG_EXCEPTION || UNITY_X_LOG_WARNING
              = true;
 #else
              = false;
@@ -193,12 +192,6 @@ namespace UnityEngineX
 #endif
         public static readonly bool EnabledWarning
 #if UNITY_X_LOG_WARNING
-             = true;
-#else
-             = false;
-#endif
-        public static readonly bool EnabledMethod
-#if UNITY_X_LOG_METHOD
              = true;
 #else
              = false;
@@ -571,30 +564,100 @@ namespace UnityEngineX
         // Without this, calling Method("hello") will take the wrong method
         public struct ArgEnd { }
 
-        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
-        {
-            Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}");
-        }
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void MethodInfo(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}]");
 
-        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
-        {
-            Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
-        }
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void MethodInfo(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
 
-        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
-        {
-            if (TryUseChannel(channelId))
-                Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
-        }
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void MethodInfo(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
 
-        [System.Diagnostics.Conditional("UNITY_X_LOG_METHOD")]
-        public static void Method(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
-        {
-            if (TryUseChannel(channel.Id))
-                Debug.Log($"{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName} - {message}");
-        }
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void MethodInfo(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void MethodWarning(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}]");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void MethodWarning(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void MethodWarning(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void MethodWarning(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void MethodError(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}]");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void MethodError(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error($"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void MethodError(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void MethodError(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}:{callerMemberName}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void ClassInfo(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info($"[{Path.GetFileNameWithoutExtension(callerFilePath)}]");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void ClassInfo(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info($"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void ClassInfo(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_INFO")]
+        public static void ClassInfo(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Info(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void ClassWarning(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning($"[{Path.GetFileNameWithoutExtension(callerFilePath)}]");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void ClassWarning(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning($"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void ClassWarning(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_WARNING")]
+        public static void ClassWarning(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Warning(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void ClassError(ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error($"[{Path.GetFileNameWithoutExtension(callerFilePath)}]");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void ClassError(object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error($"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void ClassError(int channelId, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error(channelId, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
+
+        [System.Diagnostics.Conditional("UNITY_X_LOG_ERROR")]
+        public static void ClassError(LogChannel channel, object message, ArgEnd _ = default, [CallerFilePath] string callerFilePath = "", [CallerMemberName] string callerMemberName = "")
+            => Error(channel, $"[{Path.GetFileNameWithoutExtension(callerFilePath)}] {message}");
     }
 }
