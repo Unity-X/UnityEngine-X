@@ -113,6 +113,12 @@ public static class SerializedPropertyExtensions
         }
     }
 
+    public static SerializedProperty GetParentProperty(this SerializedProperty property)
+    {
+        string parentPath = GetPropertyParentPath(property.propertyPath);
+        return property.serializedObject.FindProperty(parentPath);
+    }
+
     private static string GetPropertyParentPath(string propertyPath)
     {
         // the serialized property path will look like this:
@@ -125,7 +131,6 @@ public static class SerializedPropertyExtensions
             if (path.EndsWith(".Array")) // if the path end with .Array, we'll want to strip that away and restart
             {
                 path = path.Remove(path.LastIndexOf('.'));
-                return GetPropertyParentPath(path);
             }
         }
         else
