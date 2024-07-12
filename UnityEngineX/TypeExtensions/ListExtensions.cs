@@ -306,6 +306,46 @@ namespace UnityEngineX
             return sum;
         }
 
+        public static float Max(this List<float> list)
+        {
+            float max = float.MinValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                max = Mathf.Max(list[i], max);
+            }
+            return max;
+        }
+
+        public static int Max(this List<int> list)
+        {
+            int max = int.MinValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                max = Mathf.Max(list[i], max);
+            }
+            return max;
+        }
+
+        public static float Min(this List<float> list)
+        {
+            float min = float.MaxValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                min = Mathf.Min(list[i], min);
+            }
+            return min;
+        }
+
+        public static int Min(this List<int> list)
+        {
+            int min = int.MaxValue;
+            for (int i = 0; i < list.Count; i++)
+            {
+                min = Mathf.Min(list[i], min);
+            }
+            return min;
+        }
+
         public static Vector2 Sum(this List<Vector2> list)
         {
             Vector2 sum = Vector2.zero;
