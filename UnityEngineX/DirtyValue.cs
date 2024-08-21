@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngineX;
 
 /// <summary>
 /// Value wrapper that easily identifies if a change in value has occured.
@@ -20,6 +22,9 @@ public struct DirtyValue<T>
 
     public DirtyValue(T initialValue, bool initiallyDirty = true)
     {
+        if (!typeof(IEquatable<T>).IsAssignableFrom(typeof(T)) && !typeof(T).IsEnum)
+            Log.Error($"Because {typeof(T).Name} does not implement IEquatable<{typeof(T).Name}>, DirtyValue<{typeof(T).Name}> will allocate garbage when evaluated.");
+
         _previousValue = initialValue;
         _value = initialValue;
         _notForcedDirty = !initiallyDirty;
