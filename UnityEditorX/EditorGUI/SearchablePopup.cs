@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
 using UnityEditor;
-using System;
+using UnityEngine;
 
 namespace UnityEditorX
 {
@@ -284,8 +284,8 @@ namespace UnityEditorX
                             position.y = position.y - selected * 16 - 19;
                         }
 
-                        PopupCallbackInfo.s_instance = new PopupCallbackInfo(controlID);
-                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.s_instance.SetEnumValueDelegate, null);
+                        PopupCallbackInfo.Instance = new PopupCallbackInfo(controlID);
+                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.Instance.CallbackDelegate, null);
                         GUIUtility.keyboardControl = controlID;
                         evt.Use();
                     }
@@ -298,8 +298,8 @@ namespace UnityEditorX
                             position.y = position.y - selected * 16 - 19;
                         }
 
-                        PopupCallbackInfo.s_instance = new PopupCallbackInfo(controlID);
-                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.s_instance.SetEnumValueDelegate, null);
+                        PopupCallbackInfo.Instance = new PopupCallbackInfo(controlID);
+                        EditorUtilityX.DisplaySearchableCustomMenu(position, popupValues, checkEnabled, EditorGUI.showMixedValue ? -1 : selected, PopupCallbackInfo.Instance.CallbackDelegate, null);
                         evt.Use();
                     }
                     break;

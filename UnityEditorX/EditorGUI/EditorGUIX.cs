@@ -1,9 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System;
 using System.Reflection;
+using UnityEditor;
+using UnityEngine;
 
 // Disable Naming Styles warnings: We are intentionaly mimicking unity's source code, which doesn't respect our naming conventions
 #pragma warning disable IDE1006
@@ -19,13 +19,13 @@ namespace UnityEditorX
         internal const float kSpacing = 5;
 
         // sealed partial class for storing state for popup menus so we can get the info back to OnGUI from the user selection
-        internal sealed class PopupCallbackInfo
+        public sealed class PopupCallbackInfo
         {
             // The global shared popup state
-            public static PopupCallbackInfo s_instance = null;
+            public static PopupCallbackInfo Instance = null;
 
             // Name of the command event sent from the popup menu to OnGUI when user has changed selection
-            internal const string kPopupMenuChangedMessage = "PopupMenuChanged";
+            internal const string kPopupMenuChangedMessage = "EditorGUIX-PopupMenuChanged";
 
             // The control ID of the popup menu that is currently displayed.
             // Used to pass selection changes back again...
@@ -47,30 +47,36 @@ namespace UnityEditorX
             // *undoc*
             public static int GetSelectedValueForControl(int controlID, int selected)
             {
-                if (s_instance == null)
-                    return selected;
-
                 Event evt = Event.current;
                 if (evt.type == EventType.ExecuteCommand && evt.commandName == kPopupMenuChangedMessage)
                 {
-                    if (s_instance.m_ControlID == controlID)
+                    if (Instance == null)
                     {
-                        selected = s_instance.m_SelectedIndex;
-                        s_instance = null;
-                        GUI.changed = true;
+                        Debug.LogError("Popup menu has no instance");
+                        return selected;
+                    }
+                    if (Instance.m_ControlID == controlID)
+                    {
+                        GUI.changed = EditorGUI.showMixedValue || selected != Instance.m_SelectedIndex;
+                        selected = Instance.m_SelectedIndex;
+                        Instance = null;
                         evt.Use();
                     }
                 }
                 return selected;
             }
 
-            internal void SetEnumValueDelegate(object userData, string[] options, int selected)
+            public void CallbackDelegate(int selected)
             {
                 m_SelectedIndex = selected;
                 if (m_SourceView)
                 {
                     m_SourceView.SendEvent(EditorGUIUtility.CommandEvent(kPopupMenuChangedMessage));
                 }
+            }
+            public void CallbackDelegate(object userData, string[] options, int selected)
+            {
+                CallbackDelegate(selected);
             }
         }
 
