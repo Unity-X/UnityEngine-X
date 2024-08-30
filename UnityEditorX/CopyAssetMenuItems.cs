@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,56 +12,54 @@ namespace UnityEditorX
         [MenuItem(itemName: "Assets/Copy/GUID", priority = 19)]
         public static void CopyGUID()
         {
-            string assetPath = AssetDatabase.GetAssetPath(GetCurrentSingleSelection());
-            string assetGUID = AssetDatabase.AssetPathToGUID(assetPath);
+            List<string> str = new();
+            foreach (var item in Selection.assetGUIDs)
+            {
+                str.Add(item);
+            }
 
-            SetClipboard(assetGUID);
+            str.Sort();
+            SetClipboard(string.Join("\n", str));
         }
 
         [MenuItem(itemName: "Assets/Copy/GUID", validate = true)]
-        public static bool Validate_CopyGUID() => IsCurrentSelectionValid();
+        public static bool Validate_CopyGUID() => Selection.assetGUIDs != null && Selection.assetGUIDs.Length > 0;
 
 
         [MenuItem(itemName: "Assets/Copy/Full Path", priority = 19)]
         public static void CopyFullPath()
         {
-            string assetPath = AssetDatabase.GetAssetPath(GetCurrentSingleSelection());
-            string fullPath = Path.GetFullPath(assetPath);
-
-            SetClipboard(fullPath);
+            List<string> str = new();
+            foreach (var item in Selection.assetGUIDs)
+            {
+                str.Add(AssetDatabase.GUIDToAssetPath(item));
+            }
+            str.Sort();
+            SetClipboard(string.Join("\n", str));
         }
 
         [MenuItem(itemName: "Assets/Copy/Full Path", validate = true)]
-        public static bool Validate_CopyFullPath() => IsCurrentSelectionValid();
+        public static bool Validate_CopyFullPath() => Selection.assetGUIDs != null && Selection.assetGUIDs.Length > 0;
 
 
         [MenuItem(itemName: "Assets/Copy/Project Relative Path", priority = 19)]
         public static void CopyProjectRelativePath()
         {
-            string assetPath = AssetDatabase.GetAssetPath(GetCurrentSingleSelection());
+            List<string> str = new();
+            foreach (var item in Selection.assetGUIDs)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(item);
+                char unwantedSeparator = (Path.DirectorySeparatorChar == '/') ? '\\' : '/';
+                assetPath = assetPath.Replace(unwantedSeparator, Path.DirectorySeparatorChar);
+                str.Add(assetPath);
+            }
 
-            char unwantedSeparator = (Path.DirectorySeparatorChar == '/') ? '\\' : '/';
-
-            assetPath = assetPath.Replace(unwantedSeparator, Path.DirectorySeparatorChar);
-
-            SetClipboard(assetPath);
+            str.Sort();
+            SetClipboard(string.Join("\n", str));
         }
 
         [MenuItem(itemName: "Assets/Copy/Project Relative Path", validate = true)]
-        public static bool Validate_CopyProjectRelativePath() => IsCurrentSelectionValid();
-
-        private static Object GetCurrentSingleSelection()
-        {
-            if (Selection.objects != null && Selection.objects.Length == 1)
-                return Selection.objects[0];
-            return null;
-        }
-
-        private static bool IsCurrentSelectionValid()
-        {
-            var selection = GetCurrentSingleSelection();
-            return selection != null && AssetDatabase.IsMainAsset(selection);
-        }
+        public static bool Validate_CopyProjectRelativePath() => Selection.assetGUIDs != null && Selection.assetGUIDs.Length > 0;
 
         private static void SetClipboard(string value)
         {
