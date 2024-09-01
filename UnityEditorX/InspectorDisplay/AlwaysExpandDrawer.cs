@@ -1,6 +1,8 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
 using UnityEditor;
-using System.Collections.Generic;
+using UnityEditor.UIElements;
+using UnityEngine;
+using UnityEngine.UIElements;
 using UnityEngineX.InspectorDisplay;
 
 namespace UnityEditorX.InspectorDisplay
@@ -65,6 +67,18 @@ namespace UnityEditorX.InspectorDisplay
 
                 return result && Current.propertyPath.Contains(_parentPath);
             }
+        }
+
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            var container = new VisualElement();
+
+            foreach (SerializedProperty child in new DirectChildEnumerator(property))
+            {
+                string label = ShouldUseRealPropertyName ? child.displayName : property.displayName;
+                container.Add(new PropertyField(child, label));
+            }
+            return container;
         }
     }
 }
