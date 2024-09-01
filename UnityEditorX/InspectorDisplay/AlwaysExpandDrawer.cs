@@ -16,7 +16,7 @@ namespace UnityEditorX.InspectorDisplay
             float totalHeight = 0;
             _cachedLabel.text = label.text;
 
-            foreach (SerializedProperty child in new DirectChildEnumerator(property))
+            foreach (SerializedProperty child in new PropertyDirectChildEnumerator(property))
             {
                 if (ShouldUseRealPropertyName)
                     _cachedLabel.text = property.displayName;
@@ -32,7 +32,7 @@ namespace UnityEditorX.InspectorDisplay
 
             _cachedLabel.text = label.text;
 
-            foreach (SerializedProperty child in new DirectChildEnumerator(property))
+            foreach (SerializedProperty child in new PropertyDirectChildEnumerator(property))
             {
                 if (ShouldUseRealPropertyName)
                     _cachedLabel.text = property.displayName;
@@ -45,35 +45,11 @@ namespace UnityEditorX.InspectorDisplay
 
         bool ShouldUseRealPropertyName => ((AlwaysExpandAttribute)attribute).UseRootPropertyName == false;
 
-        struct DirectChildEnumerator
-        {
-            bool _enterChildren;
-            string _parentPath;
-            public DirectChildEnumerator(SerializedProperty property)
-            {
-                Current = property;
-                _enterChildren = property.hasChildren;
-                _parentPath = property.propertyPath;
-            }
-
-            // Enumerator interface
-            public DirectChildEnumerator GetEnumerator() => this;
-            public SerializedProperty Current { get; }
-            public bool MoveNext()
-            {
-                bool result = Current.Next(_enterChildren);
-
-                _enterChildren = false;
-
-                return result && Current.propertyPath.Contains(_parentPath);
-            }
-        }
-
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             var container = new VisualElement();
 
-            foreach (SerializedProperty child in new DirectChildEnumerator(property))
+            foreach (SerializedProperty child in new PropertyDirectChildEnumerator(property))
             {
                 string label = ShouldUseRealPropertyName ? child.displayName : property.displayName;
                 container.Add(new PropertyField(child, label));
