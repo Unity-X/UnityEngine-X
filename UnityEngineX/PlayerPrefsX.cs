@@ -18,7 +18,7 @@ public static class PlayerPrefsX
         typeof(bool),
     });
 
-    public static void Set(string key, object v)
+    public static void Set<T>(string key, T v)
     {
         switch (v)
         {
@@ -57,9 +57,16 @@ public static class PlayerPrefsX
         }
     }
 
-    public static bool TryGet<T>(string key, object defaultValue, out object value)
+    public static bool TryGet<T>(string key, T defaultValue, out T value)
     {
-        return TryGet(key, typeof(T), defaultValue, out value);
+        if (TryGet(key, typeof(T), defaultValue, out var v))
+        {
+            value = (T)v;
+            return true;
+        }
+
+        value = default;
+        return false;
     }
 
     public static bool TryGet(string key, Type valueType, object defaultValue, out object value)
@@ -120,22 +127,22 @@ public static class PlayerPrefsX
 
     public static void SetShort(string key, short v) => PlayerPrefs.SetInt(key, v);
     public static void SetUShort(string key, ushort v) => PlayerPrefs.SetInt(key, v);
-    public static void SetUInt(string key, uint v) => PlayerPrefs.SetString(key, v.ToString("R"));
-    public static void SetLong(string key, long v) => PlayerPrefs.SetString(key, v.ToString("R"));
-    public static void SetULong(string key, ulong v) => PlayerPrefs.SetString(key, v.ToString("R"));
-    public static void SetDouble(string key, double v) => PlayerPrefs.SetString(key, v.ToString("G17"));
+    public static void SetUInt(string key, uint v) => PlayerPrefs.SetString(key, v.ToString());
+    public static void SetLong(string key, long v) => PlayerPrefs.SetString(key, v.ToString());
+    public static void SetULong(string key, ulong v) => PlayerPrefs.SetString(key, v.ToString());
+    public static void SetDouble(string key, double v) => PlayerPrefs.SetString(key, v.ToString());
     public static void SetBool(string key, bool v) => PlayerPrefs.SetInt(key, v ? 1 : 0);
 
     public static short GetShort(string key, short defaultValue) => (short)PlayerPrefs.GetInt(key, defaultValue);
     public static ushort GetUShort(string key, ushort defaultValue) => (ushort)PlayerPrefs.GetInt(key, defaultValue);
-    public static uint GetUInt(string key, uint defaultValue) => uint.Parse(PlayerPrefs.GetString(key, defaultValue.ToString("R")));
-    public static long GetLong(string key, long defaultValue) => long.Parse(PlayerPrefs.GetString(key, defaultValue.ToString("R")));
-    public static ulong GetULong(string key, ulong defaultValue) => ulong.Parse(PlayerPrefs.GetString(key, defaultValue.ToString("R")));
-    public static double GetDouble(string key, double defaultValue) => double.Parse(PlayerPrefs.GetString(key, defaultValue.ToString("G17")));
+    public static uint GetUInt(string key, uint defaultValue) => uint.Parse(PlayerPrefs.GetString(key, defaultValue.ToString()));
+    public static long GetLong(string key, long defaultValue) => long.Parse(PlayerPrefs.GetString(key, defaultValue.ToString()));
+    public static ulong GetULong(string key, ulong defaultValue) => ulong.Parse(PlayerPrefs.GetString(key, defaultValue.ToString()));
+    public static double GetDouble(string key, double defaultValue) => double.Parse(PlayerPrefs.GetString(key, defaultValue.ToString()));
     public static bool GetBool(string key, bool defaultValue) => PlayerPrefs.GetInt(key, defaultValue ? 1 : 0) == 1;
 
-    public static bool TryGetUInt(string key, uint defaultValue, out uint value) => uint.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString("R")), out value);
-    public static bool TryGetLong(string key, long defaultValue, out long value) => long.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString("R")), out value);
-    public static bool TryGetULong(string key, ulong defaultValue, out ulong value) => ulong.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString("R")), out value);
-    public static bool TryGetDouble(string key, double defaultValue, out double value) => double.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString("G17")), out value);
+    public static bool TryGetUInt(string key, uint defaultValue, out uint value) => uint.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString()), out value);
+    public static bool TryGetLong(string key, long defaultValue, out long value) => long.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString()), out value);
+    public static bool TryGetULong(string key, ulong defaultValue, out ulong value) => ulong.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString()), out value);
+    public static bool TryGetDouble(string key, double defaultValue, out double value) => double.TryParse(PlayerPrefs.GetString(key, defaultValue.ToString()), out value);
 }
