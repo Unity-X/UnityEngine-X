@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System;
-using UnityEditor;
+﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
+using UnityEditor;
 using UnityEngine;
 
 public static class SerializedPropertyExtensions
@@ -71,46 +71,60 @@ public static class SerializedPropertyExtensions
         }
     }
 
-    public static object GetObjectInstance(this SerializedProperty property)
+    public static object GetContainerInstance(this SerializedProperty property)
     {
         if (property.serializedObject.targetObject == null)
             return null;
 
-        string parentPath = GetPropertyParentPath(property.propertyPath);
-
-        if (parentPath == "")
+        var parentProperty = property.GetParentProperty();
+        if (parentProperty == null)
         {
             // we're already at the root-level
             return property.serializedObject.targetObject;
         }
         else
         {
-            // we need to dig in deeper in the serialized data
-            return GetObjectInstanceFromPath(property.serializedObject.targetObject, parentPath);
+            return parentProperty.GetObjectInstance();
         }
     }
 
-    public static object[] GetObjectInstances(this SerializedProperty property)
+    public static object GetContainerInstances(this SerializedProperty property)
     {
-        string parentPath = GetPropertyParentPath(property.propertyPath);
+        if (property.serializedObject.targetObject == null)
+            return null;
 
-        if (parentPath == "")
+        var parentProperty = property.GetParentProperty();
+        if (parentProperty == null)
         {
             // we're already at the root-level
             return property.serializedObject.targetObjects;
         }
         else
         {
-            object[] targetObjects = property.serializedObject.targetObjects;
-            object[] instances = new object[targetObjects.Length];
-
-            for (int i = 0; i < instances.Length; i++)
-            {
-                // we need to dig in deeper in the serialized data
-                instances[i] = GetObjectInstanceFromPath(targetObjects[i], parentPath);
-            }
-            return instances;
+            return parentProperty.GetObjectInstances();
         }
+    }
+
+    public static object GetObjectInstance(this SerializedProperty property)
+    {
+        if (property.serializedObject.targetObject == null)
+            return null;
+
+        // we need to dig in deeper in the serialized data
+        return GetObjectInstanceFromPath(property.serializedObject.targetObject, property.propertyPath);
+    }
+
+    public static object[] GetObjectInstances(this SerializedProperty property)
+    {
+        object[] targetObjects = property.serializedObject.targetObjects;
+        object[] instances = new object[targetObjects.Length];
+
+        for (int i = 0; i < instances.Length; i++)
+        {
+            // we need to dig in deeper in the serialized data
+            instances[i] = GetObjectInstanceFromPath(targetObjects[i], property.propertyPath);
+        }
+        return instances;
     }
 
     public static SerializedProperty GetParentProperty(this SerializedProperty property)
