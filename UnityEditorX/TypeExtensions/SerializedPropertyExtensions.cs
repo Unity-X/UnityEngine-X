@@ -110,7 +110,6 @@ public static class SerializedPropertyExtensions
         if (property.serializedObject.targetObject == null)
             return null;
 
-        // we need to dig in deeper in the serialized data
         return GetObjectInstanceFromPath(property.serializedObject.targetObject, property.propertyPath);
     }
 
@@ -121,10 +120,17 @@ public static class SerializedPropertyExtensions
 
         for (int i = 0; i < instances.Length; i++)
         {
-            // we need to dig in deeper in the serialized data
             instances[i] = GetObjectInstanceFromPath(targetObjects[i], property.propertyPath);
         }
         return instances;
+    }
+
+    public static FieldInfo GetFieldInfo(this SerializedProperty property)
+    {
+        if (property.serializedObject.targetObject == null)
+            return null;
+
+        return GetFieldInfo(property.serializedObject.targetObject, property.propertyPath, out _);
     }
 
     public static SerializedProperty GetParentProperty(this SerializedProperty property)
@@ -157,14 +163,25 @@ public static class SerializedPropertyExtensions
 
     private static object GetObjectInstanceFromPath(object parentObject, string objectPath)
     {
-        object currentObject = parentObject;
+        FieldInfo fieldInfo = GetFieldInfo(parentObject, objectPath, out object containerInstance);
+        if (fieldInfo != null)
+        {
+            return fieldInfo.GetValue(containerInstance);
+        }
+
+        return containerInstance;
+    }
+
+    private static FieldInfo GetFieldInfo(object parentObject, string objectPath, out object containerInstance)
+    {
+        containerInstance = parentObject;
 
         string[] pathSerializedNames = objectPath.Split('.');
         try
         {
             for (int i = 0; i < pathSerializedNames.Length; i++)
             {
-                if (currentObject == null)
+                if (containerInstance == null)
                     break;
 
                 if (pathSerializedNames[i] == "Array")
@@ -176,17 +193,17 @@ public static class SerializedPropertyExtensions
                     // we want to extract the '15' out of 'data[15]'
                     string dataIndex = pathSerializedNames[i].Substring("data".Length + 1, pathSerializedNames[i].Length - "data".Length - "[]".Length);
                     int index = int.Parse(dataIndex);
-                    if (currentObject is IList list)
+                    if (containerInstance is IList list)
                     {
                         if (list.Count <= index)
                             return null;
-                        currentObject = list[index];
+                        containerInstance = list[index];
                     }
                 }
                 else
                 {
-                    FieldInfo fieldInfo = currentObject.GetType().GetField(pathSerializedNames[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
-                    currentObject = fieldInfo.GetValue(currentObject);
+                    FieldInfo fieldInfo = containerInstance.GetType().GetField(pathSerializedNames[i], BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+                    return fieldInfo;
                 }
             }
         }
@@ -196,6 +213,6 @@ public static class SerializedPropertyExtensions
             return null;
         }
 
-        return currentObject;
+        return null;
     }
 }
