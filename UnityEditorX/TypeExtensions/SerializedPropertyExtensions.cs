@@ -84,33 +84,13 @@ public static class SerializedPropertyExtensions
         }
         else
         {
-            return parentProperty.GetObjectInstance();
-        }
-    }
-
-    public static object GetContainerInstances(this SerializedProperty property)
-    {
-        if (property.serializedObject.targetObject == null)
-            return null;
-
-        var parentProperty = property.GetParentProperty();
-        if (parentProperty == null)
-        {
-            // we're already at the root-level
-            return property.serializedObject.targetObjects;
-        }
-        else
-        {
-            return parentProperty.GetObjectInstances();
+            return parentProperty.boxedValue;
         }
     }
 
     public static object GetObjectInstance(this SerializedProperty property)
     {
-        if (property.serializedObject.targetObject == null)
-            return null;
-
-        return GetObjectInstanceFromPath(property.serializedObject.targetObject, property.propertyPath);
+        return property.boxedValue;
     }
 
     public static object[] GetObjectInstances(this SerializedProperty property)
