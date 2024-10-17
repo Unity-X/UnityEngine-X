@@ -146,7 +146,7 @@ namespace UnityEngineX
                 if (s_initialized)
                     return PlayerPrefs.GetInt(KEY_PREFIX + name, defaultValue: activeByDefault ? 1 : 0) == 1;
                 else
-                    return true;
+                    return activeByDefault;
             }
             private static void SetActiveInSettings(string name, bool active)
             {
@@ -210,7 +210,7 @@ namespace UnityEngineX
             Application.logMessageReceived += OnMessageReceived_DebugLog;
             Application.logMessageReceivedThreaded += OnMessageReceived_DebugLog_Threaded;
 
-            Initialize();
+            ChannelManager.Initialize();
         }
 
         private static void OnMessageReceived_DebugLog(string condition, string stackTrace, LogType type)
