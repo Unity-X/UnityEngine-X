@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
+using UnityEditor.Build.Profile;
 using UnityEngine;
 using UnityEngineX;
 using static UnityEditorX.ScriptDefineSymbolManagerSettings;
@@ -14,7 +15,7 @@ namespace UnityEditorX
         public interface IProfile
         {
             string Name { get; }
-            ReadOnlyList<string> DefinedSymbols { get; }
+            string[] DefinedSymbols { get; }
         }
 
         public interface ISymbol
@@ -40,7 +41,25 @@ namespace UnityEditorX
         private static ScriptDefineSymbolManagerSettings s_settings;
         private static bool s_initialized;
 
-        public static ReadOnlyListDynamic<IProfile> Profiles => GetSettings().Profiles.AsReadOnlyNoAlloc().DynamicCast<IProfile>();
+        private class BuildProfileWrapper : IProfile
+        {
+            public BuildProfileWrapper(BuildProfile profile)
+            {
+                Profile = profile;
+            }
+
+            public string Name => Profile.name;
+
+            public string[] DefinedSymbols => Profile.scriptingDefines;
+
+            public BuildProfile Profile { get; private set; }
+        }
+
+        public static IProfile[] GetProfiles()
+        {
+            var buildProfiles = AssetDatabaseX.LoadAssetsOfType<BuildProfile>();
+            return buildProfiles.Select(p => new BuildProfileWrapper(p)).ToArray();
+        }
 
         private static void InitializeIfNeeded()
         {
@@ -66,7 +85,7 @@ namespace UnityEditorX
                             $"Ignoring duplicate in assembly {assembly.GetName().Name}.");
                         continue;
                     }
-                    
+
                     conflict = settings.Symbols.Find(s => s.Name == symbolDeclaration.Name);
                     if (conflict != null)
                     {
@@ -83,7 +102,6 @@ namespace UnityEditorX
                     };
                     s_codeProvidedSymbols.Add(symbol);
                 }
-
             }
         }
 
@@ -114,7 +132,7 @@ namespace UnityEditorX
 
             ScriptDefineSymbolManagerSettings settings = GetSettings();
 
-            foreach (var p in settings.Profiles)
+            foreach (var p in GetProfiles())
             {
                 RemoveSymbolFromProfile(symbol, p);
             }
@@ -130,9 +148,15 @@ namespace UnityEditorX
             ScriptDefineSymbolManagerSettings settings = GetSettings();
             if (settings.Symbols.Any((s) => s.Name == symbol) || s_codeProvidedSymbols.Any((s) => s.Name == symbol))
             {
-                if (profile is Profile p)
+                if (profile is BuildProfileWrapper p)
                 {
-                    p.Symbols.AddUnique(symbol);
+                    var defines = p.Profile.scriptingDefines;
+                    if (!defines.Contains(symbol))
+                    {
+                        defines = defines.Append(symbol).ToArray();
+                        Array.Sort(defines);
+                        p.Profile.scriptingDefines = defines;
+                    }
                 }
             }
             else
@@ -159,12 +183,11 @@ namespace UnityEditorX
             symbol.Name = newName;
             symbol.Description = newDescription;
 
-            foreach (var item in settings.Profiles)
+            foreach (var profile in GetProfiles())
             {
-                int indexToReplace = item.Symbols.IndexOf(symbolName);
-                if (indexToReplace != -1)
+                if (RemoveSymbolFromProfile(symbolName, profile))
                 {
-                    item.Symbols[indexToReplace] = newName;
+                    AddSymbolInProfile(symbolName, profile);
                 }
             }
 
@@ -173,90 +196,19 @@ namespace UnityEditorX
 
         public static bool RemoveSymbolFromProfile(string symbol, IProfile profile)
         {
-            InitializeIfNeeded();
-            if (profile is Profile p)
+            if (profile is BuildProfileWrapper p && p.Profile.scriptingDefines.Contains(symbol))
             {
-                p.Symbols.Remove(symbol);
-                EditorUtility.SetDirty(GetSettings());
+                p.Profile.scriptingDefines = p.Profile.scriptingDefines.Where(x => x != symbol).ToArray();
+                EditorUtility.SetDirty(p.Profile);
                 return true;
             }
 
             return false;
-        }
-
-        public static IProfile CreateProfile(string name)
-        {
-            InitializeIfNeeded();
-            ScriptDefineSymbolManagerSettings settings = GetSettings();
-            if (!IsProfileNameValid(name))
-            {
-                return null;
-            }
-
-            var newProfile = new Profile();
-            newProfile.Name = name;
-
-            settings.Profiles.Add(newProfile);
-            settings.Profiles.Sort((a, b) => a.Name.CompareTo(b.Name));
-
-            EditorUtility.SetDirty(settings);
-
-            return newProfile;
-        }
-
-
-        private static bool IsProfileNameValid(string name)
-        {
-            InitializeIfNeeded();
-            if (string.IsNullOrEmpty(name))
-            {
-                Debug.LogError($"Invalid profile name.");
-                return false;
-            }
-
-            ScriptDefineSymbolManagerSettings settings = GetSettings();
-            if (settings.Profiles.Any((p => p.Name == name)))
-            {
-                Debug.LogError($"A profile with the name {name} already exists.");
-                return false;
-            }
-
-            return true;
         }
 
         public static IProfile GetProfile(string name)
         {
-            InitializeIfNeeded();
-            return GetSettings().Profiles.Find((p) => p.Name == name);
-        }
-
-        public static void RenameProfile(IProfile profile, string newName)
-        {
-            InitializeIfNeeded();
-            if (!IsProfileNameValid(newName))
-            {
-                return;
-            }
-
-            if (profile is Profile p)
-            {
-                p.Name = newName;
-                EditorUtility.SetDirty(GetSettings());
-            }
-        }
-
-        public static bool DeleteProfile(IProfile profile)
-        {
-            InitializeIfNeeded();
-            ScriptDefineSymbolManagerSettings settings = GetSettings();
-
-            if (settings.Profiles.Remove(profile as Profile))
-            {
-                EditorUtility.SetDirty(settings);
-                return true;
-            }
-
-            return false;
+            return GetProfiles().Find((p) => p.Name == name);
         }
 
         private static ScriptDefineSymbolManagerSettings GetSettings()
@@ -272,6 +224,6 @@ namespace UnityEditorX
 
     public static class ScriptDefineSymbolManagerProfileExtensions
     {
-        public static string GetCombinedSymbols(this ScriptDefineSymbolManager.IProfile profile) => string.Join(";", profile.DefinedSymbols.ToArray());
+        public static string GetCombinedSymbols(this ScriptDefineSymbolManager.IProfile profile) => string.Join(";", profile.DefinedSymbols);
     }
 }

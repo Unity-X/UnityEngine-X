@@ -24,17 +24,19 @@ namespace UnityEditorX
 
         private static Rect s_createProfileButtonRect;
         private static Rect s_createSymbolButtonRect;
-        private static Dictionary<ScriptDefineSymbolManager.IProfile, bool> s_profileFoldStates = new Dictionary<ScriptDefineSymbolManager.IProfile, bool>();
-        private static Dictionary<ScriptDefineSymbolManager.ISymbol, bool> s_symbolFoldStates = new Dictionary<ScriptDefineSymbolManager.ISymbol, bool>();
+        private static Dictionary<string, bool> s_profileFoldStates = new();
+        private static Dictionary<ScriptDefineSymbolManager.ISymbol, bool> s_symbolFoldStates = new();
 
         private static void OnGUI(string searchContext)
         {
+            var profiles = ScriptDefineSymbolManager.GetProfiles();
+
             //cleanup
-            foreach (var profile in s_profileFoldStates.Keys)
+            foreach (var profileName in s_profileFoldStates.Keys)
             {
-                if (!ScriptDefineSymbolManager.Profiles.Contains(profile))
+                if (profiles.Find(p => p.Name == profileName) == null)
                 {
-                    s_profileFoldStates.Remove(profile);
+                    s_profileFoldStates.Remove(profileName);
                     break;
                 }
             }
@@ -49,47 +51,19 @@ namespace UnityEditorX
 
             EditorGUILayout.LabelField("Profiles", EditorStyles.boldLabel);
 
-            string[] currentSymbols = PlayerSettings.GetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup).Split(';');
-            Array.Sort(currentSymbols);
-
-            foreach (ScriptDefineSymbolManager.IProfile profile in ScriptDefineSymbolManager.Profiles)
+            foreach (ScriptDefineSymbolManager.IProfile profile in ScriptDefineSymbolManager.GetProfiles())
             {
-                if (!s_profileFoldStates.ContainsKey(profile))
-                    s_profileFoldStates.Add(profile, true);
+                if (!s_profileFoldStates.ContainsKey(profile.Name))
+                    s_profileFoldStates.Add(profile.Name, true);
 
                 string label = profile.Name;
 
-                string[] definedSymbols = profile.DefinedSymbols.ToArray();
+                string[] definedSymbols = profile.DefinedSymbols;
                 Array.Sort(definedSymbols);
 
-                if (currentSymbols.SequenceEqual(definedSymbols))
-                {
-                    label += "    <color=green>✓ <i>current</i></color>";
-                }
-                s_profileFoldStates[profile] = EditorGUILayout.BeginFoldoutHeaderGroup(s_profileFoldStates[profile], label, EditorStylesX.FoldoutHeaderRich, menuAction: (Rect rect) =>
-                {
-                    Rect screenRect = GUIUtility.GUIToScreenRect(rect);
-                    var genericMenu = new GenericMenu();
-                    genericMenu.AddItem(new GUIContent("Delete"), false, () =>
-                    {
-                        if (EditorUtility.DisplayDialog("Delete Profile", $"Are you sure you want to delete the profile \"{profile.Name}\" ?", "Yes", "Cancel"))
-                        {
-                            ScriptDefineSymbolManager.DeleteProfile(profile);
-                        }
-                    });
-                    genericMenu.AddItem(new GUIContent("Rename"), false, () =>
-                    {
-                        PopupRenameProfile.Get(screenRect).Profile = profile;
-                    });
-                    genericMenu.AddItem(new GUIContent("Apply To Current Build Target"), false, () =>
-                    {
-                        PlayerSettings.SetScriptingDefineSymbolsForGroup(EditorUserBuildSettings.selectedBuildTargetGroup, profile.GetCombinedSymbols());
-                    });
-                    genericMenu.ShowAsContext();
-                });
+                s_profileFoldStates[profile.Name] = EditorGUILayout.BeginFoldoutHeaderGroup(s_profileFoldStates[profile.Name], label, EditorStylesX.FoldoutHeaderRich);
 
-
-                if (s_profileFoldStates[profile])
+                if (s_profileFoldStates[profile.Name])
                 {
                     using var _0 = ListPool<string>.Get(out List<string> symbolsToAdd);
                     using var _1 = ListPool<string>.Get(out List<string> symbolsToRemove);
@@ -151,11 +125,6 @@ namespace UnityEditorX
                     EditorGUILayout.Space();
                 }
                 EditorGUILayout.EndFoldoutHeaderGroup();
-            }
-
-            if (GUILayout.Button("New Profile"))
-            {
-                PopupCreateProfile.Get(s_createProfileButtonRect);
             }
 
             if (Event.current.type == EventType.Repaint) s_createProfileButtonRect = GUIUtility.GUIToScreenRect(GUILayoutUtility.GetLastRect());
@@ -243,74 +212,6 @@ namespace UnityEditorX
 
 
             EditorGUILayout.EndVertical();
-        }
-
-        public class PopupCreateProfile : EditorWindow
-        {
-            public static PopupCreateProfile Get(Rect buttonRect)
-            {
-                Rect rect = new Rect(buttonRect.position + Vector2.up * 60, new Vector2(275, 45));
-                var window = GetWindowWithRect<PopupCreateProfile>(rect, true, "Create Profile");
-                window.position = rect;
-                return window;
-            }
-
-            private string _name;
-
-            public void OnGUI()
-            {
-                _name = EditorGUILayout.TextField("Name", _name);
-
-                if (GUILayout.Button("Create"))
-                {
-                    ScriptDefineSymbolManager.CreateProfile(_name);
-                    Close();
-                }
-            }
-
-            private void OnLostFocus()
-            {
-                Close();
-            }
-        }
-
-        public class PopupRenameProfile : EditorWindow
-        {
-            public static PopupRenameProfile Get(Rect buttonRect)
-            {
-                Rect p = new Rect(buttonRect.position, new Vector2(275, 45));
-                var window = GetWindowWithRect<PopupRenameProfile>(p, true, "Rename Profile");
-                window.position = p;
-
-                return window;
-            }
-
-            public ScriptDefineSymbolManager.IProfile Profile;
-
-            private string _name;
-            private bool _firstUpdate = true;
-
-            public void OnGUI()
-            {
-                if (_firstUpdate)
-                {
-                    _name = Profile.Name;
-                    _firstUpdate = false;
-                }
-
-                _name = EditorGUILayout.TextField("Name", _name);
-
-                if (GUILayout.Button("Rename"))
-                {
-                    ScriptDefineSymbolManager.RenameProfile(Profile, _name);
-                    Close();
-                }
-            }
-
-            private void OnLostFocus()
-            {
-                Close();
-            }
         }
 
         public class PopupCreateSymbol : EditorWindow
