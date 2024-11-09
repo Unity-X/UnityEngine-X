@@ -29,10 +29,11 @@ namespace UnityEditorX
         [MenuItem(itemName: "Assets/Copy/Full Path", priority = 19)]
         public static void CopyFullPath()
         {
+            string projectPath = Application.dataPath.Substring(0, Application.dataPath.Length - "Assets".Length);
             List<string> str = new();
             foreach (var item in Selection.assetGUIDs)
             {
-                str.Add(AssetDatabase.GUIDToAssetPath(item));
+                str.Add($"{projectPath}{AssetDatabase.GUIDToAssetPath(item)}");
             }
             str.Sort();
             SetClipboard(string.Join("\n", str));
