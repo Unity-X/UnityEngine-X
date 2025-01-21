@@ -206,4 +206,28 @@ public static class SerializedPropertyExtensions
 
         return null;
     }
+
+    public static bool IsDisposed(this SerializedProperty property)
+    {
+        try
+        {
+            return property.serializedObject == null || property.serializedObject.targetObject == null;
+        }
+        catch
+        {
+            return true;
+        }
+    }
+
+    public static bool IsDisposed(this SerializedObject serializedObject)
+    {
+        try
+        {
+            return serializedObject.targetObject == null;
+        }
+        catch
+        {
+            return true;
+        }
+    }
 }
