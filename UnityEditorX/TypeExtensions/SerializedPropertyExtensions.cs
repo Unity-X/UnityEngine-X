@@ -211,12 +211,20 @@ public static class SerializedPropertyExtensions
     {
         try
         {
-            return property.serializedObject == null || property.serializedObject.targetObject == null;
+            if (property.serializedObject == null || property.serializedObject.targetObject == null)
+                return true;
+
+            if (property.propertyType == SerializedPropertyType.ManagedReference)
+            {
+                // this will trigger an exception if the object is disposed
+                var _ = property.managedReferenceValue;
+            }
         }
         catch
         {
             return true;
         }
+        return false;
     }
 
     public static bool IsDisposed(this SerializedObject serializedObject)
