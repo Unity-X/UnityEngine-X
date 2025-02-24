@@ -95,10 +95,11 @@ namespace UnityEngineX
 
         public static void SwapWithLast<T>(this List<T> list, int index)
         {
-            if (list.Count <= 1)
+            int lastIndex = list.Count - 1;
+
+            if (index >= lastIndex)
                 return;
 
-            int lastIndex = list.Count - 1;
             T temp = list[lastIndex];
 
             //Swap chosen element with element at end of list
