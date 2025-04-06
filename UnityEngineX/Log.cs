@@ -112,7 +112,6 @@ namespace UnityEngineX
                 }
 
                 channel.Active = value;
-                SetActiveInSettings(channel.Name, value);
             }
 
             internal static LogChannel GetChannel(int id)
@@ -139,19 +138,9 @@ namespace UnityEngineX
                 s_channelsLock.ExitReadLock();
             }
 
-            private const string KEY_PREFIX = "unity-x-log-channel-";
-
             private static bool IsActiveInSettings(string name, bool activeByDefault)
             {
-                if (s_initialized)
-                    return PlayerPrefs.GetInt(KEY_PREFIX + name, defaultValue: activeByDefault ? 1 : 0) == 1;
-                else
-                    return activeByDefault;
-            }
-            private static void SetActiveInSettings(string name, bool active)
-            {
-                PlayerPrefs.SetInt(KEY_PREFIX + name, active ? 1 : 0);
-                PlayerPrefs.Save();
+                return activeByDefault;
             }
         }
 
