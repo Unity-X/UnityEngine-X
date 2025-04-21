@@ -5,6 +5,17 @@ namespace UnityEngineX
 {
     public class DisablableValue : EnablableDisablableValueBase
     {
+        public struct Scope : IDisposable
+        {
+            public string Key;
+            public DisablableValue DisablableValue;
+
+            public void Dispose()
+            {
+                DisablableValue.RemoveDisable(Key);
+            }
+        }
+
         public DisablableValue() : base(enabledByDefault: true)
         {
         }
@@ -12,7 +23,11 @@ namespace UnityEngineX
         /// <summary>
         /// Add a disable, disabling the value if it was previously enabled.
         /// </summary>
-        public void AddDisable(string key) => AddKey(key);
+        public Scope AddDisable(string key)
+        {
+            AddKey(key);
+            return new() { DisablableValue = this, Key = key };
+        }
 
         /// <summary>
         /// Add a disable if the given key was not already there. Returns true if the disable was added.
@@ -37,6 +52,17 @@ namespace UnityEngineX
 
     public class EnablableValue : EnablableDisablableValueBase
     {
+        public struct Scope : IDisposable
+        {
+            public string Key;
+            public EnablableValue EnablableValue;
+
+            public void Dispose()
+            {
+                EnablableValue.RemoveEnable(Key);
+            }
+        }
+
         public EnablableValue() : base(enabledByDefault: false)
         {
         }
@@ -44,7 +70,11 @@ namespace UnityEngineX
         /// <summary>
         /// Add an enable, enabling the value if it was previously disabled.
         /// </summary>
-        public void AddEnable(string key) => AddKey(key);
+        public Scope AddEnable(string key)
+        {
+            AddKey(key);
+            return new() { EnablableValue = this, Key = key };
+        }
 
         /// <summary>
         /// Add an enable if the given key was not already there. Returns true if the enable was added.
