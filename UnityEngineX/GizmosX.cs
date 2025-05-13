@@ -78,24 +78,24 @@ namespace UnityEngineX
 
         public static void DrawCircle(Vector3 position, Color color, float radius = 1.0f)
         {
-            DrawCircle(position, Vector3.up, color, radius);
+            DrawCircle(position, Vector3.forward, color, radius);
         }
 
-        public static void DrawCircle(Vector3 position, Vector3 up, float radius = 1.0f)
+        public static void DrawCircle(Vector3 position, Vector3 normal, float radius = 1.0f)
         {
-            DrawCircle(position, position, Color.white, radius);
+            DrawCircle(position, normal, Gizmos.color, radius);
         }
 
         public static void DrawCircle(Vector3 position, float radius = 1.0f)
         {
-            DrawCircle(position, Vector3.up, Color.white, radius);
+            DrawCircle(position, Vector3.forward, Gizmos.color, radius);
         }
 
-        public static void DrawCircle(Vector3 position, Vector3 up, Color color, float radius = 1.0f)
+        public static void DrawCircle(Vector3 position, Vector3 normal, Color color, float radius = 1.0f)
         {
-            up = ((up == Vector3.zero) ? Vector3.up : up).normalized * radius;
-            Vector3 _forward = Vector3.Slerp(up, -up, 0.5f);
-            Vector3 _right = Vector3.Cross(up, _forward).normalized * radius;
+            normal = ((normal == Vector3.zero) ? Vector3.up : normal).normalized * radius;
+            Vector3 _forward = Vector3.Slerp(normal, -normal, 0.5f);
+            Vector3 _right = Vector3.Cross(normal, _forward).normalized * radius;
 
             Matrix4x4 matrix = new Matrix4x4();
 
@@ -103,9 +103,9 @@ namespace UnityEngineX
             matrix[1] = _right.y;
             matrix[2] = _right.z;
 
-            matrix[4] = up.x;
-            matrix[5] = up.y;
-            matrix[6] = up.z;
+            matrix[4] = normal.x;
+            matrix[5] = normal.y;
+            matrix[6] = normal.z;
 
             matrix[8] = _forward.x;
             matrix[9] = _forward.y;
