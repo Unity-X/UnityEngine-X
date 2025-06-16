@@ -25,14 +25,15 @@ namespace UnityEngineX
             if (canvas == null)
                 throw new Exception("No canvas found in parents.");
 
-            if(canvas.renderMode == RenderMode.WorldSpace)
+            canvas = canvas.rootCanvas;
+
+            if (canvas.renderMode == RenderMode.WorldSpace)
             {
                 Rect rect = rectTr.rect;
 
                 Camera camera = canvas.worldCamera;
-                if(camera == null)
+                if (camera == null)
                     throw new Exception("No camera attached to canvas with 'WorldSpace' render mode.");
-
 
                 Vector2 screenMin = camera.WorldToScreenPoint(rectTr.TransformPoint(rect.min));
                 Vector2 screenMax = camera.WorldToScreenPoint(rectTr.TransformPoint(rect.max));
@@ -41,7 +42,7 @@ namespace UnityEngineX
             }
             else
             {
-                Rect rect =  rectTr.GetRectRelativeTo((RectTransform)canvas.transform);
+                Rect rect = rectTr.GetRectRelativeTo((RectTransform)canvas.transform);
 
                 rect.position *= canvas.scaleFactor;
                 rect.size *= canvas.scaleFactor;
