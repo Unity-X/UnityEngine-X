@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
 using UnityEngineX;
-using Unity.Collections;
 
 namespace UnityEditorX
 {
@@ -116,6 +116,7 @@ namespace UnityEditorX
 
             if (asset == null)
             {
+                path = path.Replace('\\', '/');
                 AssetDatabaseX.CreateFolderFromPath(path.Remove(path.LastIndexOf('/')));
                 AssetDatabase.CreateAsset(createFunc(), path);
                 asset = AssetDatabase.LoadAssetAtPath<T>(path);
