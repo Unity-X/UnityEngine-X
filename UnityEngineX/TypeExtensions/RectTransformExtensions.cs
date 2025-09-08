@@ -18,14 +18,17 @@ namespace UnityEngineX
             return new Rect(relativeMin - bRect.min, relativeSize);
         }
 
-        public static void SetScreenPosition(this RectTransform rectTransform, Vector2 screenPoint)
+        public static void SetScreenPosition(this RectTransform rectTransform, Vector2 screenPoint, Canvas containerCanvas = null)
         {
-            var canvas = rectTransform.GetComponentInParent<Canvas>();
+            var canvas = containerCanvas == null ? rectTransform.GetComponentInParent<Canvas>() : containerCanvas;
 
             if (canvas == null)
                 throw new Exception("No canvas found in parents.");
             Vector2 result = canvas.ScreenToCanvasPosition(screenPoint);
             rectTransform.position = result;
+            var localPos = rectTransform.localPosition;
+            localPos.z = 0;
+            rectTransform.localPosition = localPos;
         }
 
         public static Rect GetScreenRect(this RectTransform rectTr)
