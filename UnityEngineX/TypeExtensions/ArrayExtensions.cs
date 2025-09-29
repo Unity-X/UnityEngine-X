@@ -17,16 +17,19 @@ namespace UnityEngineX
             return index < array.Length;
         }
 
-        public static T TryGetAt<T>(this T[] array, uint index)
+        public static T GetAt<T>(this T[] array, uint index, T defaultValue)
         {
-            array.TryGetAt(index, out T result);
-            return result;
+            if (array.TryGetAt(index, out T result))
+                return result;
+            return defaultValue;
         }
-        public static T TryGetAt<T>(this T[] array, int index)
+        public static T GetAt<T>(this T[] array, int index, T defaultValue)
         {
-            array.TryGetAt(index, out T result);
-            return result;
+            if (array.TryGetAt(index, out T result))
+                return result;
+            return defaultValue;
         }
+
         public static bool TryGetAt<T>(this T[] array, uint index, out T result)
         {
             if (array.IsValidIndex(index))
