@@ -8,7 +8,7 @@ namespace UnityEditorX
         string _parentPath;
         public PropertyDirectChildEnumerator(SerializedProperty property)
         {
-            Current = property;
+            Current = property.Copy();
             _enterChildren = property.hasChildren;
             _parentPath = property.propertyPath;
         }
