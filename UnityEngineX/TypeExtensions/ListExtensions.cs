@@ -386,6 +386,24 @@ namespace UnityEngineX
         {
             return list.Sum() / list.Count;
         }
+
+        public static T GetAt<T>(this List<T> array, int index, T defaultValue)
+        {
+            if (array.TryGetAt(index, out T result))
+                return result;
+            return defaultValue;
+        }
+
+        public static bool TryGetAt<T>(this List<T> array, int index, out T result)
+        {
+            if (array.IsValidIndex(index))
+            {
+                result = array[index];
+                return true;
+            }
+            result = default;
+            return false;
+        }
     }
 
 }
