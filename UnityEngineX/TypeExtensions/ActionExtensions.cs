@@ -102,7 +102,7 @@ namespace UnityEngineX
                     break;
 
                 case LogMode.Error:
-                    Debug.LogError(message);
+                    Debug.LogException(exception);
                     break;
             }
         }
