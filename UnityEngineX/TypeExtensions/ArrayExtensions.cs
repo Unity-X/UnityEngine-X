@@ -17,13 +17,13 @@ namespace UnityEngineX
             return index < array.Length;
         }
 
-        public static T GetAt<T>(this T[] array, uint index, T defaultValue)
+        public static T GetAt<T>(this T[] array, uint index, T defaultValue = default)
         {
             if (array.TryGetAt(index, out T result))
                 return result;
             return defaultValue;
         }
-        public static T GetAt<T>(this T[] array, int index, T defaultValue)
+        public static T GetAt<T>(this T[] array, int index, T defaultValue = default)
         {
             if (array.TryGetAt(index, out T result))
                 return result;
