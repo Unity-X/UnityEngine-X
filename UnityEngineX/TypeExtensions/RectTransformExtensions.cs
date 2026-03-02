@@ -56,21 +56,9 @@ namespace UnityEngineX
             }
             else
             {
-                screenRect.position /= canvas.scaleFactor;
                 screenRect.size /= canvas.scaleFactor;
-
                 rectTransform.pivot = Vector2.zero;
                 rectTransform.sizeDelta = screenRect.size;
-
-                // maybe needed?
-                //{
-                //    Vector2 relativeSize = rectTransform.InverseTransformVector(canvas.transform.TransformVector(screenRect.size));
-                //    Vector2 relativeMin = rectTransform.InverseTransformPoint(canvas.transform.TransformPoint(screenRect.min));
-                //}
-                //{
-                //    Vector2 relativeSize = canvas.transform.InverseTransformVector(rectTransform.TransformVector(screenRect.size));
-                //    Vector2 relativeMin = canvas.transform.InverseTransformPoint(rectTransform.TransformPoint(screenRect.min));
-                //}
             }
 
             // Set position
