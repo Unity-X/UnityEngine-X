@@ -31,6 +31,58 @@ namespace UnityEngineX
             rectTransform.localPosition = localPos;
         }
 
+        public static void SetScreenRect(this RectTransform rectTransform, Rect screenRect, Canvas containerCanvas = null)
+        {
+            var canvas = containerCanvas == null ? rectTransform.GetComponentInParent<Canvas>() : containerCanvas;
+
+            if (canvas == null)
+                throw new Exception("No canvas found in parents.");
+
+            // Set size
+            if (canvas.renderMode == RenderMode.WorldSpace)
+            {
+                Log.Warning("This method is not complete!");
+                //Camera camera = canvas.worldCamera;
+                //if (camera == null)
+                //    throw new Exception("No camera attached to canvas with 'WorldSpace' render mode.");
+
+                //Vector2 canvasMin = camera.ScreenToWorldPoint(screenRect.min);
+                //Vector2 canvasMax = camera.ScreenToWorldPoint(screenRect.max);
+
+                //var localMin = rectTransform.InverseTransformPoint(canvasMin);
+                //var localMax = rectTransform.InverseTransformPoint(canvasMax);
+
+                //return new Rect(screenMin, screenMax - screenMin);
+            }
+            else
+            {
+                screenRect.position /= canvas.scaleFactor;
+                screenRect.size /= canvas.scaleFactor;
+
+                rectTransform.pivot = Vector2.zero;
+                rectTransform.sizeDelta = screenRect.size;
+
+                // maybe needed?
+                //{
+                //    Vector2 relativeSize = rectTransform.InverseTransformVector(canvas.transform.TransformVector(screenRect.size));
+                //    Vector2 relativeMin = rectTransform.InverseTransformPoint(canvas.transform.TransformPoint(screenRect.min));
+                //}
+                //{
+                //    Vector2 relativeSize = canvas.transform.InverseTransformVector(rectTransform.TransformVector(screenRect.size));
+                //    Vector2 relativeMin = canvas.transform.InverseTransformPoint(rectTransform.TransformPoint(screenRect.min));
+                //}
+            }
+
+            // Set position
+            {
+                Vector2 canvasMin = canvas.ScreenToCanvasPosition(screenRect.min);
+                rectTransform.position = canvasMin;
+                var localPos = rectTransform.localPosition;
+                localPos.z = 0;
+                rectTransform.localPosition = localPos;
+            }
+        }
+
         public static Rect GetScreenRect(this RectTransform rectTr)
         {
             var canvas = rectTr.GetComponentInParent<Canvas>();
