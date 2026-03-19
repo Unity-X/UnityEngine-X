@@ -75,16 +75,13 @@ namespace UnityEngineX
         {
             var canvas = rectTr.GetComponentInParent<Canvas>();
 
-            if (canvas == null)
-                throw new Exception("No canvas found in parents.");
+            canvas = canvas?.rootCanvas;
 
-            canvas = canvas.rootCanvas;
-
-            if (canvas.renderMode == RenderMode.WorldSpace)
+            if (canvas == null || canvas.renderMode == RenderMode.WorldSpace)
             {
                 Rect rect = rectTr.rect;
 
-                Camera camera = canvas.worldCamera;
+                Camera camera = canvas?.worldCamera ?? Camera.main;
                 if (camera == null)
                     throw new Exception("No camera attached to canvas with 'WorldSpace' render mode.");
 
