@@ -5,7 +5,7 @@ namespace UnityEngineX
 {
     public static class EnumExtensions
     {
-        public static unsafe bool Contains<TEnum>(this TEnum lhs, TEnum rhs) where TEnum :
+        public static unsafe bool Intersects<TEnum>(this TEnum lhs, TEnum rhs) where TEnum :
             unmanaged, Enum
         {
             switch (sizeof(TEnum))
